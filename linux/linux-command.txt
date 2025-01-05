@@ -1,0 +1,57 @@
+
+
+# Distribution linux 
+
+1-- Ubuntu
+
+2-- centos (RHEL)
+
+3- Debian
+
+# Machine Local   -----> SSH(secure shell)                EC2(Elastic Compute Cloud)
+
+# kernel (bash/shell scripting)
+
+# daemons (d)
+
+
+# fichier cache commence avec un .env .lix
+
+# yum, apt
+
+# yum install/uninstall nom_du_service
+
+# yum install nginx (server web, reverse proxy, load balancer)
+
+# systemctl (systemctl action(
+    status, restart, start, stop, reload, enable, desable
+), le_nom_du_service)
+
+
+# cat concatenate
+
+Gestion Systeme
+
+    -/bin , /sbin/, /lib, /boot, /etc 
+
+
+Gestion Utilisateur
+    -/home, /root 
+
+
+Stockage des donnees
+
+    -/var, /tmp, /srv 
+
+
+Materiel et peripheriques 
+
+    /dev , /proc, /sys 
+
+Logiciel et extension 
+
+    /opt, /usr 
+
+Montages
+
+    /mnt, /media
