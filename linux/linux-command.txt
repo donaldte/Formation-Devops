@@ -55,3 +55,16 @@ Logiciel et extension
 Montages
 
     /mnt, /media
+
+
+# heberger un project html css et javscript sur notre EC2 en utilsant les command linux 
+# ssh 
+/usr/share/nginx
+
+scp: secure copy protocol
+
+scp -i devops-100 fichier_a_envoye  machine virtuel: /home/ec2-user
+
+scp -i devops-100.pem templates.zip ec2-user@ec2-16-171-10-120.eu-north-1.compute.amazonaws.com:/home/ec2-user
+
+mv templatemo_588_ebook_landing/*  /usr/share/nginx/html/
