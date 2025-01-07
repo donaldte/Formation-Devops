@@ -1,0 +1,111 @@
+Understanding Linux Commands
+
+
+1. Linux Filesystem Hierarchy:
+- `/`: Root directory, the top-level directory.
+
+- `/bin`: Essential user command binaries (for use by all users).
+
+- `/boot`: Static files of the boot loader.
+
+- `/dev`: Device files.
+
+- `/etc`: Host-specific system configuration.
+
+- `/home`: User home directories.
+
+- `/lib`: Essential shared libraries and kernel modules.
+
+- `/opt`: Add-on application software packages.
+
+- `/tmp`: Temporary files.
+
+- `/usr`: Secondary hierarchy for read-only user data; contains the majority of (multi-)user utilities and applications.
+
+- `/var`: Variable files—files whose content is expected to continually change during normal operation of the system, such as logs, spool files, and temporary e-mail files.
+
+
+
+2. Common Linux Commands:
+- `ls`: List directory contents.
+
+- `cd`: Change the working directory.
+
+- `chmod`: Change file mode bits.
+
+- `chown`: Change file owner and group.
+
+- `pwd`: Print working directory.
+
+- `mkdir`: Create a new directory.
+
+- `rm`: Remove files or directories.
+
+- `touch`: Change file timestamps or create an empty file.
+
+- `cat`: Concatenate and print file contents.
+
+- `nano`, `vi`, `vim`: Text editors.
+
+
+
+3. Package Management:
+- `yum`: Package manager for RHEL-based distributions.
+
+- `apt`: Package manager for Debian-based distributions.
+
+- Update system: `sudo yum update` or `sudo apt update && sudo apt upgrade`.
+
+- Install packages: `sudo yum install [package]` or `sudo apt install [package]`.
+
+
+
+4. Text Editors:
+-Nano: Beginner-friendly, easy to use.
+
+-Vi/Vim: Advanced text editors with modes (insert and command mode), powerful and efficient but with a steeper learning curve.
+
+
+
+5. Remote File Transfer:
+- `scp`: Securely copy files between local and remote hosts.
+
+
+
+6. User and Group Management:
+- `sudo`: Execute a command as another user, typically the superuser.
+
+
+
+7. Accessing and Editing Files:
+- `cat`: Viewing contents of files.
+
+- `nano`, `vi`, `vim`: Editing files.
+
+- `scp`: Transferring files.
+
+- `rm`: Removing files.
+
+
+
+8. Hosting a Static Website:
+- Understanding web servers like Apache and Nginx.
+
+- Hosting files in `/var/www/html` or the Nginx equivalent directory.
+
+- Modifying content and ensuring proper permissions.
+
+
+
+9. Permissions:
+- Understanding `chmod` and file permissions (read, write, execute for owner, group, and others).
+
+- Using `sudo` for elevated privileges.
+
+
+
+10. Monitoring and Managing Processes:
+- `ps`, `top`, `htop`: Tools for monitoring active processes.
+
+- `kill`, `pkill`: Commands to stop or kill processes.
+
