@@ -22,4 +22,16 @@ BOOK1 BOOK2
     # COMPLIANCE 
 
 
-    # TEAN COLABORATION        
+    # TEAN COLABORATION 
+
+GIT (DISTRIBUTED)  (FORK) 
+SVN ET CVS  (CENTRALIZED) DEV1 ---- DEV2j  
+
+git init 
+git status 
+git branch
+git add . 
+git commit -m 
+git log 
+git diff id 
+git reset --hard id 
