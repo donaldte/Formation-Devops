@@ -1,0 +1,20 @@
+# strategie des branches
+
+Kubernetes 
+
+Repertoire: Master ou Main 
+
+Master:Calculator: ## designer l'uI: Master ##-----> release-v0
+|
+|                                                       release v1
+features-add-number------> Tester---->
+
+
+
+Main ou Master son les branch les plus ajour
+
+la branche feature ajouter une nouvelle foncitonalites
+
+la branche release delivre la une version du projet au users
+
+fixing branch 
