@@ -18,3 +18,21 @@ la branche feature ajouter une nouvelle foncitonalites
 la branche release delivre la une version du projet au users
 
 fixing branch 
+
+11-----
+12-------
+13------
+git cherry-pick id 
+git merge 
+git rebase 
+
+PR: pull request
+
+ssh -T git@github.com 
+ls -lrta 
+git remote -v 
+ssh-keygen -t rsa -b 4096 -C "email"
+git log --oneline 
+git cherry-pick id 
+git merge branch_name 
+git rebase branch_name 
