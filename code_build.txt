@@ -1,0 +1,23 @@
+Application cloud9( vsc )--- aws codecommit (git et github)--- aws codebuild ---> aws codedeploy ---> aws codepipeline
+Rg---A ---- Design--Inpl---test---deploy---mon&main
+# le code source doit etre regroupe et tester
+
+HLL(python, java) ----> code machine 
+
+1---> compilation(byte code)          
+
+2---> Linking(dependence et libs)
+
+3---> optimisation(performance)
+
+4---> packaging 
+
+
+TEST   ------------TEST UNITAIRES TEST D'INTEGRATION, TEST PERFORMANCE
+# USES CASE DU CODEBUILD
+
+        1---> CI/CD 
+        2---> BUILDING ET PACKAGING DU SOFTWARE 
+        3---> AUTOMATE TESTING 
+        4---> IAC
+        5---> BUILDING DOCKER CONTAINER

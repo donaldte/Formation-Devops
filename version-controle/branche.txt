@@ -36,3 +36,5 @@ git log --oneline
 git cherry-pick id 
 git merge branch_name 
 git rebase branch_name 
+
+fork et clone 
