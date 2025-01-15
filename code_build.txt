@@ -14,10 +14,55 @@ HLL(python, java) ----> code machine
 
 
 TEST   ------------TEST UNITAIRES TEST D'INTEGRATION, TEST PERFORMANCE
-# USES CASE DU CODEBUILD
+# USES CASE DU CODEBUILD(jinking, githlab, github action, etc...)
 
         1---> CI/CD 
         2---> BUILDING ET PACKAGING DU SOFTWARE 
         3---> AUTOMATE TESTING 
         4---> IAC
         5---> BUILDING DOCKER CONTAINER
+
+LES CAS D'UTILISATION DU AWS CODEBUILD  
+
+1----> CI/CD  SC ---> BUILD ----> TEST---->DEPLOY---->MONITORING
+FICHIER LOG, 
+
+2---> BUILDING AND PACKAGING THE SOFTWARE (buildspec.ymal) ----> artifact (config, exe, )
+ymal(Yet Another Markup Language)
+
+
+3--> AUTOMATE testing (rapport des test)
+        Junit pour Java 
+        Nunit pour .Net 
+
+CRUD(CREATE, RETRIEVE, UPDATE , DELETE)      SELENUIM ----> RAPPORT TEST  
+
+
+4---> IAC INFRACTSTRUCTURE AS CODE 
+
+        ----VN(MACHINE VIRTUELLE) >>>>> manuellement ou automatiquement
+        ----db
+        Outils: aws cloudformation 
+
+5----> building docker container 
+
+buildspec.ymal: 
+
+        1-- vesion: 
+        2--> phase : 
+                ** install 
+                ** pre_build 
+                ** build 
+                ** post_build
+                ** artifact (s3 bucket) ---> envoye a la prochaine phase
+
+
+BENEFICS DE AWS CODEBUILD 
+
+        1--> FULLY MANAGE 
+        2--> EASY INTERGRATION WITH OTHERS AWS SERVICES
+        3--> FLEXIBILTY AND CUSTOMIZATION 
+        4---> SECURITY (RBAC) IAM , ENCRYPTION , NETWORK SECURITY
+                                                VPC (VITUAL PRIVATE CLOUD) (SECURITY GROUP)
+
+        5---> COST EFFECTIF   serverles (pay as you go)                                     
