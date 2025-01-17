@@ -65,4 +65,10 @@ BENEFICS DE AWS CODEBUILD
         4---> SECURITY (RBAC) IAM , ENCRYPTION , NETWORK SECURITY
                                                 VPC (VITUAL PRIVATE CLOUD) (SECURITY GROUP)
 
-        5---> COST EFFECTIF   serverles (pay as you go)                                     
+        5---> COST EFFECTIF   serverles (pay as you go)   
+
+SC----> BUILD ----> TEST---- > DEPLOY---->MONITORING   
+
+FAIT UN PROJECT ---> REPO(GIT ET GITHUB) ----> AWS CODE BUILD ----> AWS S3 BUCKET 
+
+buildspec.yml vesion, install, pre_build, build , post_build et artifact 
