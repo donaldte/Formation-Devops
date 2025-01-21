@@ -71,4 +71,9 @@ SC----> BUILD ----> TEST---- > DEPLOY---->MONITORING
 
 FAIT UN PROJECT ---> REPO(GIT ET GITHUB) ----> AWS CODE BUILD ----> AWS S3 BUCKET 
 
-buildspec.yml vesion, install, pre_build, build , post_build et artifact 
+buildspec.yml vesion, install, pre_build, build , post_build et artifact
+
+SC---> BUILD ----> Deploy (S3)
+
+
+
