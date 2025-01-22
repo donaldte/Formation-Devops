@@ -1,0 +1,14 @@
+aws code deploy 
+
+ecrire du code: cloud9(VSC) 
+manager et stocker le code: AWS CODE COMMIT(git et github)
+build et le test: aws codebuild 
+deploy: aws codedeploy(automatiser)
+    ---> du travail 
+    ---> error 
+logging et le monitoring: cloudtrail et cloudwatch 
+aws codepipeline
+
+deploy/release ..........> EC2 ou lambda function
+
+plusierus serveur (deployment group)
