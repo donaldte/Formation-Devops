@@ -12,3 +12,118 @@ aws codepipeline
 deploy/release ..........> EC2 ou lambda function
 
 plusierus serveur (deployment group)
+
+
+
+
+
+Pourquoi utiliser AWS CodeDeploy ? 🤔
+
+AWS CodeDeploy est un service qui simplifie
+ et automatise le déploiement d'applications
+  vers différents environnements. Comparons les
+   méthodes de déploiement manuelles, 
+   basées sur des scripts, et l'utilisation 
+   d'AWS CodeDeploy.
+
+1️⃣ Déploiement manuel (Manual Deployment) 🛠️
+Avec le manuel, vous déployez directement 
+sur le serveur (avec des commandes manuelles).
+Inconvénients (Disadvantages) :
+
+🕒 Consomme du temps (time-consuming) : 
+    Chaque étape doit être réalisée à la main.
+❌ Source d'erreurs (error-prone) : 
+    Les erreurs humaines sont fréquentes.
+🌀 Manque de cohérence (lack of consistency) :
+     Le déploiement peut varier d'un environnement à l'autre.
+⚡ Utilisation inefficace des ressources (inefficient resource utilization) : 
+    Le processus est peu optimisé.
+📉 Évolutivité limitée (limited scalability) :
+     Difficile à appliquer à de nombreux serveurs.
+🚫 Pas de mécanisme de retour arrière (no rollback mechanism) : 
+    Impossible d'annuler facilement un déploiement 
+    en cas de problème.
+    
+2️⃣ Déploiement avec scripts (Script-based Deployment) 💻
+Vous écrivez du code pour automatiser le déploiement.
+Inconvénients (Disadvantages) :
+
+✍️ Écrire les scripts (write script) : 
+    Cela demande du temps et des compétences.
+🧩 Complexité (complexity) : 
+    Plus l'application est grande, plus le script devient
+     complexe.
+⚠️ Gestion limitée des erreurs (limited error handling) :
+     Les scripts ne gèrent pas toujours bien les échecs.
+🌀 Manque de cohérence (inconsistency) :
+     Les résultats peuvent varier selon l'environnement.
+🚫 Pas de fonctionnalités avancées (lack of advanced features) : 
+    Comme le basculement de trafic.
+📉 Évolutivité limitée (limited scalability) :
+     Pas idéal pour de grandes infrastructures.
+🔧 Entretien lourd (maintenance overhead) : 
+    Les scripts doivent être constamment mis à jour.
+
+    
+🌟 Avantages d'AWS CodeDeploy 🌟
+Pourquoi choisir AWS CodeDeploy plutôt que d'autres outils ?
+
+✅ Supporte plusieurs types de déploiements (Supports different types of deployment).
+🛠️ Facile à intégrer avec d'autres outils (Easy to work with other tools).
+⚙️ Configuration simple (Easy to setup).
+🛠️ Personnalisation (Allows customization of your deployment).
+🔄 Rollback facile (Rollback if something goes wrong).
+⏳ Gain de temps (Saves time).
+🔗 Intégration fluide (Easy integration).
+🌍 Déploiement multi-environnements (Supports multiple environments: dev, test, prod).
+🚦 Basculement de trafic (Traffic shifting).
+💰 Économique (Cost-effective).
+
+
+
+
+
+📋 Stratégies de déploiement (Deployment Strategies)
+
+1️⃣ Blue/Green Deployment 🚦
+
+Création de deux environnements :
+     l'ancien (blue) et le nouveau (green). 
+     Une fois validé, le trafic est basculé 
+     vers le nouvel environnement.
+
+
+2️⃣ Rolling Deployment 🔄
+
+Mise à jour progressive des serveurs en 
+déployant le code par lot.
+
+
+3️⃣ Canary Deployment 🐤
+
+Déploiement sur une petite portion de serveurs 
+pour tester avant un déploiement complet.
+
+
+4️⃣ Shadow Deployment 🌘
+
+Déploiement silencieux pour surveiller 
+le comportement de la nouvelle version sans
+ affecter les utilisateurs.
+
+
+5️⃣ A/B Deployment 🅰️🅱️
+
+Comparaison de deux versions de l'application 
+pour évaluer laquelle est la meilleure.
+
+6️⃣ Continuous Deployment ♾️
+
+Automatisation complète : chaque changement validé dans
+ le code est immédiatement déployé.
+
+7️⃣ In-Place Deployment 📍
+
+Mise à jour directe sur les serveurs existants 
+sans créer de nouvel environnement.
