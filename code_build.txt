@@ -76,4 +76,11 @@ buildspec.yml vesion, install, pre_build, build , post_build et artifact
 SC---> BUILD ----> Deploy (S3)
 
 
+app qu'on peut deployer 
+
+        app code 
+        exe file 
+        config file 
+        zip, war, files 
+
 
