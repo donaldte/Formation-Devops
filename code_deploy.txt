@@ -302,6 +302,119 @@ Le choix du type de déploiement dépend de la plateforme et de vos besoins en t
 
 
 
+arn:aws:iam::148930418126:role/CodeDeployServiceRole
+
+
+Dans cet exercice, vous allez configurer AWS CodeDeploy en effectuant les étapes suivantes :
+
+Créer un compte AWS avec des permissions limitées. acces programmatique(IAM)
+Configurer un rôle de service pour CodeDeploy.
+Restreindre les permissions attribuées à CodeDeploy.
+
+Créer un profil d’instance IAM pour Amazon EC2.
+
+ec2 ----> s3 
+s3 name: newbucketcodedeploy
+arn:aws:s3:::newbucketcodedeploy
+s3---->> creer policies -----> attacher cela a un role qui est attache au service ec2 
+
+
+
+
+
+
+
+
+
+
+
+
+
+✔️ Création d’un compte AWS avec un utilisateur IAM restreint.
+✔️ Mise en place d’un rôle de service pour CodeDeploy.
+✔️ Restriction des permissions accordées à CodeDeploy.
+✔️ Création d’un profil d’instance IAM pour EC2.
+
+💡 Prochaines étapes :
+
+Installer l’agent CodeDeploy sur l’instance EC2.
+Déployer une première application avec AWS CodeDeploy.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Configuration d'AWS CodeDeploy
+1. Configuration du compte AWS
+Assurez-vous de posséder un compte AWS et un utilisateur IAM avec des permissions administratives.
+Activez l'accès programmatique pour l'utilisateur IAM afin de permettre les interactions avec les services AWS via la CLI ou les SDKs.
+2. Création d'un rôle de service pour CodeDeploy
+Un rôle de service est nécessaire pour accorder à CodeDeploy les permissions requises pour effectuer des actions en votre nom.
+Créez ce rôle via la console de gestion AWS, en spécifiant CodeDeploy comme entité de confiance et en lui attribuant la politique gérée appropriée.
+3. Limiter les permissions de l'utilisateur IAM
+Restreignez les permissions de l'utilisateur IAM afin de minimiser les risques de sécurité et d'empêcher les actions non autorisées.
+Définissez les permissions nécessaires dans la politique IAM pour permettre uniquement les actions indispensables aux tâches de CodeDeploy.
+4. Création d'un profil d'instance IAM pour les instances EC2 (si nécessaire)
+Requis pour le déploiement sur EC2 afin d'accorder aux instances l'accès aux ressources AWS, telles que les buckets S3.
+Créez un rôle IAM (profil d'instance) et attachez-lui des politiques permettant l'accès aux ressources nécessaires.
+5. Installation de l’agent CodeDeploy (si déploiement sur EC2/serveurs sur site)
+L’agent CodeDeploy est requis sur chaque instance EC2 ou serveur sur site du groupe de déploiement.
+Il coordonne avec le service CodeDeploy pour exécuter les tâches de déploiement.
+Composants d'AWS CodeDeploy
+1. Application
+Un conteneur ou un regroupement du logiciel à déployer, similaire à l'organisation d'outils dans une boîte à outils.
+2. Plateforme de calcul
+La plateforme cible sur laquelle vous déploierez votre application, incluant Amazon EC2, AWS Lambda, les serveurs sur site et Amazon ECS.
+3. Configuration du déploiement
+Ensemble de règles et paramètres définissant le processus de déploiement, y compris la stratégie, l'environnement, le routage du trafic et la gestion des erreurs.
+4. Groupe de déploiement
+Un ensemble de ressources (comme des instances EC2) ciblées pour le déploiement. Il spécifie où l’application sera déployée.
+5. Type de déploiement
+La méthode de déploiement, soit in-place (mise à jour directe sur l’ensemble des instances cibles), soit blue/green (création d’un environnement dupliqué pour tests avant de rediriger le trafic).
+6. Profil d'instance IAM
+Un rôle IAM attaché aux instances EC2, leur accordant les permissions nécessaires pour accéder aux ressources AWS durant le déploiement.
+7. Révision
+La nouvelle version de votre application logicielle, packagée avec tous les fichiers et configurations nécessaires, prête à être déployée.
+8. Rôle de service
+Un rôle IAM spécifique qui accorde à CodeDeploy la permission d'accéder à d'autres services AWS et d'exécuter des tâches liées au déploiement.
+9. Révision cible
+La version la plus récente de l'application que CodeDeploy va déployer sur les instances spécifiées.
+10. Composants supplémentaires
+Fichiers de spécification de l'application, État de santé des instances, Agent CodeDeploy sont d'autres composants importants à connaître pour gérer les déploiements et répondre aux besoins spécifiques.
+Bonnes pratiques et conseils
+Comprendre les stratégies de déploiement :
+Choisissez la bonne stratégie de déploiement (in-place ou blue/green) en fonction des besoins de votre application et de l'importance d'un service ininterrompu.
+Automatiser et sécuriser :
+Utilisez des rôles IAM et des profils d'instance pour gérer l’accès de manière automatisée et sécurisée.
+Maintenez votre agent CodeDeploy à jour pour garantir des performances et une sécurité optimales.
+Surveiller et journaliser :
+Exploitez les services AWS comme CloudWatch pour surveiller les déploiements et journaliser les activités à des fins de diagnostic et de référence future.
+Pratiquer les retours en arrière :
+Familiarisez-vous avec les fonctionnalités de rollback de CodeDeploy afin de revenir rapidement à une version précédente en cas d’échec du déploiement.
+
+
+
+
+
+
 
 
 

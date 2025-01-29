@@ -1,0 +1,104 @@
+arn:aws:iam::148930418126:role/codedeploynewtest
+amazonssmmanageinstancecors
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowFullAccess",
+            "Effect": "Allow",
+            "Action": "*",
+            "Resource": "*"
+        },
+        {
+            "Sid": "DenyIAMModifications",
+            "Effect": "Deny",
+            "Action": [
+                "iam:DeleteUser",
+                "iam:DeleteRole",
+                "iam:DeletePolicy",
+                "iam:DetachUserPolicy",
+                "iam:DetachRolePolicy",
+                "iam:CreatePolicyVersion",
+                "iam:SetDefaultPolicyVersion",
+                "iam:DeletePolicyVersion",
+                "iam:UpdateAssumeRolePolicy",
+                "iam:PutUserPolicy",
+                "iam:PutRolePolicy"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "DenyLoggingDisabling",
+            "Effect": "Deny",
+            "Action": [
+                "cloudtrail:StopLogging",
+                "cloudtrail:DeleteTrail",
+                "logs:DeleteLogGroup",
+                "logs:DeleteLogStream",
+                "logs:PutRetentionPolicy",
+                "logs:DeleteRetentionPolicy"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "DenyS3Deletion",
+            "Effect": "Deny",
+            "Action": [
+                "s3:DeleteBucket",
+                "s3:PutBucketAcl",
+                "s3:PutBucketPolicy",
+                "s3:PutBucketPublicAccessBlock",
+                "s3:DeleteObject"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "DenyDynamoDBDeletion",
+            "Effect": "Deny",
+            "Action": [
+                "dynamodb:DeleteTable"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "DenyEC2Termination",
+            "Effect": "Deny",
+            "Action": [
+                "ec2:TerminateInstances",
+                "ec2:StopInstances",
+                "ec2:DeleteSecurityGroup",
+                "ec2:ModifyInstanceAttribute"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "CodeDeployRolePolicy",
+            "Effect": "Allow",
+            "Action": "iam:PassRole",
+            "Resource": "arn:aws:iam::123456789012:role/CodeDeployServiceRole"
+        }
+    ]
+}
+
+
+
+
+
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket",
+                "s3:GetObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::your-bucket-name/*",
+                "arn:aws:s3:::region/*"
+            ]
+        }
+    ]
+}
+
