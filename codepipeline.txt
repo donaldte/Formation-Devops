@@ -1,0 +1,32 @@
+INTRODUCTION TO AWS CODEPIPELINE 
+IT automate the process we have seen so far(sc-build-test-deploy)
+ci/cd it automate the SDLC
+ci is Continuous intergration
+cd is Continuous delivery or deployment
+why using this service? 
+  --it take less time 
+  -- quick and reliable
+  -- less erros
+
+the Continuous delivery need the intervention of manual personn to delivery the update it prevent too many frequenly delivery 
+and Continuous deployment does need manual intervention 
+
+
+
+
+
+
+IMPORTANT TERMS IN AWS CODEPIPELINE
+
+A) PIPLINES 
+        1) STAGE 
+        2) ACTION 
+B) PIPELINE EXECUTION 
+        -- STOPPED EXECTUITONS 
+        -- FAILED EXECTUITONS
+        -- SUSPERSEDED EXECUTION 
+C) STAGE EXECUTION 
+D) ACTION EXECTUITONS 
+E) ARTIFACTS (STORAGE S3, AWS CODEARTIFACT, AWS ECR) 
+F) SOURCE REVISION                 
+
