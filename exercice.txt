@@ -1,0 +1,1929 @@
+Live Project
+Introduction
+
+
+Welcome guys, we have come all the way till here after learning so many important AWS developer services. Now it’s time to combine our learning and use all the AWS services to develop a project as a whole.
+
+
+
+In this section we will create a web application from scratch and develop a CICD pipeline for this web application.
+
+
+
+Ready? Let’s begin.
+
+
+
+Overview of Project
+In this project, we will build and deploy a simple Java web application using the AWS Developer services. We will use AWS CodeCommit as a Git repository to store our code and AWS CodeArtifact to manage software packages. We will use AWS CodeBuild to compile the Java application, and AWS CodeDeploy to deploy the application to an EC2 web server. AWS CodePipeline will help orchestrate and help us automate the entire process.
+
+
+
+
+
+You can use an AWS free-tier account to carry out this project.
+
+
+
+Perform the steps simultaneously while learning through the document.
+
+
+
+Understand the various code and scripts used for this project. Detailed explanation is provided wherever necessary.
+
+
+
+Our end result of this project will look like this.
+
+
+
+
+
+Let’s Begin
+Let’s divide the whole project into smaller parts and execute step by step.
+
+
+
+Task 1: Set up AWS Cloud Environment using AWS Cloud9
+AWS Cloud9 is a cloud-native integrated development environment (IDE) that empowers you to write, execute, and troubleshoot code directly through your web browser.
+
+
+
+Throughout this workshop, we will leverage AWS Cloud9 for the development of our application code and seamless interaction with Git.
+
+
+
+Log onto the AWS Console.
+
+
+
+Search for Cloud9 and then click Create environment.
+
+
+
+Name the environment UnicornIDE and give a helpful description. In network settings, let’s select the SSH option. We will keep the rest of the settings default. Please remember we had discussed all these options in the AWS Cloud9 chapter earlier.
+
+Click on ‘Create environment’
+
+Open the IDE by clicking on the ‘OPEN’ button.
+
+
+
+This is the AWS Cloud9 Linux environment for our project.
+
+
+
+The file explorer is on the left side, and terminal prompt at the bottom. Within the Cloud9 setup, useful tools like Docker, Git and AWS CLI are preconfigured and ready to use.
+
+
+
+Let’s quickly confirm this using the following commands.
+
+docker –version
+
+git –version
+
+aws –version
+
+
+
+That’s it, our cloud9 development environment is set-up.
+
+
+
+Task 2: Create the web application
+In this project we are creating a simple Java web application using Apache Maven build tool. Apache Maven is a popular build automation and project management tool primarily used in the Java software development projects. Its main purpose is to automate the process of building software projects. It manages the compilation of source code, packaging of artifacts such as JAR files, running tests, and producing distributable formats such as JAR and WAR files). This automation simplifies and standardizes the build process, reducing the potential for errors.
+
+
+
+So our step in task 2 is to download this build automation tool from the public repository. We will use the ‘wget’ command to download the Apache Maven repository from the Internet.
+
+
+
+$ sudo wget https://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
+
+
+
+Let me explain this command.
+
+
+
+sudo: It's the command used to execute the following command as the superuser or with administrative rights.
+
+
+
+wget: This is the command-line utility for downloading files from the internet. In our case, we are using it to fetch a file from the specified URL of Apache Maven public repository.
+
+
+
+https://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo: This is the URL of the file that the wget command is instructed to download. It's a repository configuration file for Apache Maven.
+
+
+
+-O /etc/yum.repos.d/epel-apache-maven.repo: The -O option specifies the location and name to save the downloaded file. In this case, it's instructing wget to save the downloaded repository configuration file as /etc/yum.repos.d/epel-apache-maven.repo. The /etc/yum.repos.d directory is commonly used for storing repository configuration files on Linux systems. These files are used by package managers like yum to determine where to download software packages.
+
+
+
+So, in summary, this command downloads a repository configuration file for Apache Maven from a specific URL and saves it as /etc/yum.repos.d/epel-apache-maven.repo with superuser privileges. This file is then used by package management tools to enable the installation of Apache Maven and related packages from this repository.
+
+
+
+Then we will execute the command.
+
+
+
+$ sudo sed -i s/\$releasever/6/g /etc/yum.repos.d/epel-apache-maven.repo
+
+
+
+Let me explain this command.
+
+
+
+sudo: This command is used to execute the following command with administrative rights.
+
+
+
+sed: This is a short form of stream editor used to perform text transformations on input data such as a file or data stream and produce modified output. In our context, it's used to edit the contents of a file. sed works by reading one line at a time from its input, applying specified text-editing operations to each line, and then printing the modified lines to standard output. It is often used for tasks such as searching, replacing, inserting, deleting, and modifying text within files.
+
+
+
+It’s syntax is
+
+
+
+sed [OPTIONS] 'COMMAND' [input_file]
+
+
+
+-i: This is a sed option that stands for "in-place." It instructs sed to edit the file directly, without creating a backup or a temporary file. Changes are made directly to the specified file.
+
+
+
+s/\$releasever/6/g: This is the sed command itself, which consists of three parts:
+
+
+
+s: This indicates a substitution operation in sed, where one pattern is replaced with another.
+
+/\$releasever/: This is the pattern to be found in the file. It's looking for the text $releasever. The dollar sign ($) is escaped with a backslash (\) to prevent it from being treated as a special character by sed.
+
+6: This is the replacement text. It's what $releasever will be replaced with.
+
+g: This stands for "global" and means that all occurrences of the pattern in each line of the file should be replaced, not just the first occurrence.
+
+/etc/yum.repos.d/epel-apache-maven.repo: This is the path to the file in which sed will perform the in-place substitution. In our case, it's /etc/yum.repos.d/epel-apache-maven.repo.
+
+
+
+In summary, the command uses sed with sudo privileges to edit the file /etc/yum.repos.d/epel-apache-maven.repo. It replaces all occurrences of the text $releasever with 6 within that file.
+
+
+
+Now that we have downloaded and made the necessary changes in the Apache Maven file, let’s install it in our cloud9 IDE with the following command.
+
+
+
+$ sudo yum install -y apache-maven
+
+
+
+when we run sudo yum install -y apache-maven, you are telling the system to use yum to install Apache Maven without prompting for confirmation.
+
+
+
+After running this command, Apache Maven will be installed on your system, and you can use it to build and manage Java projects.
+
+
+
+We want to have the latest version of Java installed which is Java 8 and more specifically Amazon Correto 8. Amazon Corretto 8 is a no-cost, multiplatform, production-ready distribution of the Open Java Development Kit (OpenJDK) 8. It is provided and supported by Amazon Web Services (AWS).
+
+
+
+Amazon Corretto 8 is built from the same source code as OpenJDK 8, which means it is fully compatible with Java SE 8 (Java Standard Edition 8). It includes all the features and updates available in Java 8, making it suitable for running Java applications and workloads that depend on this version.
+
+
+
+Amazon Corretto 8 is a good choice for developers and organizations that rely on Java 8 and need a stable, open-source, and well-supported runtime environment. It can be used for a wide range of Java applications, from web services to desktop applications to enterprise solutions.
+
+
+
+So let’s run a few commands to get the latest version of Java and Amazon Correto 8.
+
+
+
+The first command is,
+
+
+
+$ sudo amazon-linux-extras enable corretto8
+
+When we run the sudo amazon-linux-extras enable corretto8 command, we are instructing Amazon Linux to enable the repository that contains Amazon Corretto 8. Enabling the repository makes it possible to install Corretto 8 using the package manager, such as yum, by simply specifying the package name (e.g., sudo yum install java-1.8.0-amazon-corretto). Once enabled, we can then proceed to install and use Amazon Corretto 8 on your Amazon Linux system.
+
+
+
+$ sudo yum install -y java-1.8.0-amazon-corretto-devel
+
+When we run the sudo yum install -y java-1.8.0-amazon-corretto-devel command, we are telling the YUM package manager to install the Amazon Corretto 8 JDK, including development tools, without any prompts. This JDK can be used for developing and running Java applications on your Linux system.
+
+
+
+$ export JAVA_HOME=/usr/lib/jvm/java-1.8.0-amazon-corretto.x86_64
+
+When we run the export JAVA_HOME=/usr/lib/jvm/java-1.8.0-amazon-corretto.x86_64 command, we are essentially telling the shell to set the JAVA_HOME environment variable to the specified path. This allows other programs and scripts to reference the JAVA_HOME variable to determine the location of the Java Development Kit.
+
+
+
+It's worth noting that setting JAVA_HOME is a common practice in Java development to ensure that the correct JDK is used by build tools and applications. Different projects or tools may require different JDK versions, so having JAVA_HOME correctly configured is essential for managing multiple Java installations on a system.
+
+
+
+
+
+$ export PATH=/usr/lib/jvm/java-1.8.0-amazon-corretto.x86_64/jre/bin/:$PATH
+
+When we run the export PATH=/usr/lib/jvm/java-1.8.0-amazon-corretto.x86_64/jre/bin/:$PATH command, we are effectively adding the directory /usr/lib/jvm/java-1.8.0-amazon-corretto.x86_64/jre/bin/ to the beginning of the PATH variable. This means that when we enter a command in the shell, the system will first look in this directory to find the corresponding executable. If it doesn't find the executable there, it will continue searching in the other directories listed in the PATH variable.
+
+
+
+This modification of the PATH variable is commonly used to ensure that the correct version of a program or executable is used. In our case, it's used to prioritize the Amazon Corretto 8 Java binaries over any other Java installations that may exist in the system, making it the default Java runtime for your shell session.
+
+
+
+All right, so our build tool is installed properly.
+
+
+
+Let’s create the application now.
+
+
+
+We will use the following command to create the java application.
+
+
+
+$ mvn archetype:generate \
+
+-DgroupId=com.wildrydes.app \
+
+-DartifactId=unicorn-web-project \
+
+-DarchetypeArtifactId=maven-archetype-webapp \
+
+-DinteractiveMode=false
+
+
+
+Let’s understand the command.
+
+
+
+The mvn archetype:generate command is used with Apache Maven, a build automation and project management tool for Java projects, to generate a new Maven project based on a specified archetype.
+
+
+
+mvn: This is the command to run Apache Maven. We must have Maven installed on your system for this command to work. We have already done this step.
+
+
+
+archetype:generate: This is a built-in goal that instructs Maven to generate a new project based on predefined project templates known as "archetypes." These archetypes serve as project templates or blueprints, specifying the project's structure, dependencies, and initial configuration.
+
+
+
+When we execute the archetype:generate goal, Maven presents us with a series of prompts to customize our project, such as providing a groupId (typically an organization's identifier), an artifactId (the project's unique identifier within the group), version numbers, and other project-specific details.
+
+
+
+-DgroupId=com.wildrydes.app: This is a system property (denoted by -D) that sets the groupId for the new Maven project. The groupId is typically a unique identifier for our project's group or organization. In our example, it's set to com.wildrydes.app.
+
+
+
+-DartifactId=unicorn-web-project: This is another system property that sets the artifactId for the new project. The artifactId is a unique identifier for the specific project within the group. In our case, it's set to unicorn-web-project.
+
+
+
+-DarchetypeArtifactId=maven-archetype-webapp: This property specifies the archetype to use for generating the project. In our example, it's set to maven-archetype-webapp, which is a predefined Maven archetype for creating web application projects. This archetype sets up a basic web project structure.
+
+
+
+-DinteractiveMode=false: This property disables interactive mode, meaning that Maven won't prompt us for input during project generation. Instead, it will use the values provided for groupId, artifactId, and archetype.
+
+
+
+When we run this mvn archetype:generate command, Maven will use the specified archetype (maven-archetype-webapp) to create a new Maven project with the following characteristics:
+
+
+
+Group ID: com.wildrydes.app
+
+Artifact ID: unicorn-web-project
+
+Project type: Web application
+
+
+
+Maven will generate the project structure and necessary configuration files based on the archetype, allowing us to start developing our web application using Maven as our build and dependency management tool. This is a common way to kickstart a new Java web project using Maven.
+
+
+
+That’s how we create a Java web application using the Maven build tool. Now let’s check project structure and necessary configuration files that are generated.
+
+
+
+We will have to check the index.jsp and pom.xml files.
+
+
+
+We have to modify these files to suit our website. Let us access these files through the Cloud9 console from this left panel. Let us put a few sentences in this code. Open the index.jsp file.
+
+
+
+<html>
+
+<body>
+
+<h2>Hello Unicorn World!</h2>
+
+<p>This is my new version of the Wild Rydes application!</p>
+
+</body>
+
+</html>
+
+
+
+All right guys, so now the Java source code for our web application is ready. Remember this source code is right now in the cloud9 environment, which means it is in the EC2 instance that it generated for the cloud9 environment. So we can consider it to be similar to a local machine.
+
+
+
+So our next step is to store this Java source code in AWS cloud. We have to move this source code from the EC2 instance to a cloud based Git repository like AWS CodeCommit.
+
+
+
+That’s where our next task starts.
+
+
+
+Task 3: Create repository using AWS CodeCommit
+We have discussed the AWS CodeCommit at length in the previous chapters. So let’s use that knowledge and create a CodeCommit repository to store our Java source code.
+
+
+
+Log into the AWS Console and search for the CodeCommit service.
+
+
+
+Click Create repository. Name it unicorn-web-project and give it a description. Also add a tag with key team and value devops.
+
+
+
+Click Create.
+
+
+
+On the next page select Clone URL and Clone HTTPS. This will copy the repository URL to the clipboard.
+
+
+
+https://git-codecommit.<region>.amazonaws.com/v1/repos/<project-name>
+
+
+
+Repository is created.
+
+
+
+We need to set up Git credentials, so that we can push the Java source code from the Cloud9 environment to the CodeCommit repository. Let’s do this.
+
+
+
+Go to the Cloud9 environment to set up our Git identity.
+
+
+
+git config --global user.name "<your name>"
+
+git config --global user.email <your email>
+
+Let’s ensure we are in the ~/environment/unicorn-web-project.
+
+
+
+cd ~/environment/unicorn-web-project
+
+
+
+Let’s initialise a new Git repository in the unicorn-web-project directory and set up the initial branch as "main." Git is a version control system that allows you to track changes in your project's source code and collaborate with others.
+
+
+
+git init -b main
+
+
+
+Now let’s configure a remote connection to the AWS CodeCommit repository ‘unicorn-web-project’ that we just created.
+
+
+
+git remote add origin <HTTPS CodeCommit repo URL>
+
+
+
+This command sets up a link between our local Git repository in the unicorn-web-project directory in cloud9 environment and the remote CodeCommit repository, allowing us to push and pull code between our local repository and the remote one hosted on AWS.
+
+
+
+So after running these commands, our unicorn-web-project directory in cloud9 environment will be initialized as a Git repository, and we will be able to use Git to track changes in our project's Java source code. The remote "origin" will be configured to point to our AWS CodeCommit repository, enabling us to push our code to AWS CodeCommit for secure version control and collaboration.
+
+
+
+Now this is all set, let’s commit and push the code.
+
+
+
+git add *
+
+This command stages all the changes (new files, modified files, and deleted files) in the current directory for the next commit. After running this command, Git will be aware of the changes, but they have not yet been permanently recorded in the repository.
+
+
+
+git commit -m "Initial commit"
+
+This command creates a new commit that includes all the changes we previously staged with git add *. We will provide a commit message "Initial commit" just to explain that this is the first commit in the repository.
+
+
+
+git push -u origin main
+
+This command pushes our local commits to the "main" branch of the remote repository in CodeCommit named "origin." Once pushed, our changes are available in the remote CodeCommit repository for collaboration with others or for backup and version control.
+
+
+
+So in short, we started tracking changes in a local Git repository, created an initial commit with a commit message, and pushed that commit to a remote CodeCommit repository, and set up the main branch to track the remote CodeCommit main branch for future pushes and pulls.
+
+
+
+So now we have a working CodeCommit repository to store and version control our Java source code.
+
+
+
+Now it's time to convert this Java source code into a deployable format. Let’s see how AWS CodeArtifact will help us in this process.
+
+
+
+Task 4: Setup AWS CodeArtifact repository
+We discussed AWS CodeArtifact in the previous chapters. It is a fully managed artifact repository service that organizations of any size can use to securely fetch, store, publish, and share online software packages used in their software development process.
+
+
+
+In our project we are going to create one such CodeArtifact repository. We will store a few online software packages that we may require while building the Java web application. We will make this CodeArtifact repository a private repository and make it available to this project and if required for any other future projects that we intend to build. We could have used the online software packages directly for building our project. However, many times such public repositories can become unavailable for unknown reasons. In such cases, having our own repository to store such packages will ensure that our build processes are not hampered. In case the public repository experiences an outage, it can lead to a break in the complete CI/CD pipeline. So storing the necessary packages in CodeArtifact is the secured solution.
+
+
+
+So let’s create a domain and a repository in the AWS CodeArtifact console.
+
+
+
+4.1 Create CodeArtifact domain and repository
+
+
+Go to the AWS CodeArtifact console.
+
+
+
+Select Domains in the menu on the left navigation panel, then click on Create domain. Name it as unicorns and choose "Create domain" to finish the domain setup.
+
+
+
+Now, click in Create repository to create a repository for this new domain. Name it unicorn-packages and write a description. Select maven-central-store from the drop-down list as public upstream repository and click on Next.
+
+
+
+Review the settings once.
+
+
+
+You will see a Package flow diagram. Let’s understand this.
+
+It shows the creation of two repositories in the process, the primary unicorn-packages repository and an intermediary upstream repository named maven-central-store, bridging to the public repository, maven-central.
+
+
+
+Click on "Create repository" to complete the procedure.
+
+
+
+4.2 Connecting to CodeArtifact repository
+Now it’s time to connect our Java source code to this CodeArtifact repository.
+
+
+
+On the next page, click View connection instructions. In the dialog, choose Mac & Linux for Operating system and mvn as package manager.
+
+As our code is Java based, we have to use the Maven package which is denoted by mvn.
+
+
+
+During the build process, the Java web application has to access the CodeArtifact domain and the repository. To ensure this access is smooth, we have to obtain an AWS CodeArtifact authorization token and set it as an environment variable named CODEARTIFACT_AUTH_TOKEN.
+
+
+
+We will use the following command.
+
+
+
+$ export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain unicorns --domain-owner 123456789012 --query authorizationToken --output text`
+
+
+
+Let’s quickly understand the working of this command.
+
+
+
+export: This Linux shell command to create and assign values to environment variables. In our case, it's used to set an environment variable.
+
+
+
+CODEARTIFACT_AUTH_TOKEN: This is the name of the environment variable being created. It will hold the AWS CodeArtifact authorization token.
+
+
+
+`` (backticks): These are used to execute a subcommand within the main command and capture its output. In our case, it's used to execute the AWS CLI command enclosed within backticks and assign its output to the CODEARTIFACT_AUTH_TOKEN environment variable.
+
+
+
+aws codeartifact get-authorization-token: This is an AWS CLI command for AWS CodeArtifact. It is used to retrieve an authorization token for accessing an AWS CodeArtifact domain.
+
+
+
+--domain unicorns: This specifies the CodeArtifact domain named "unicorns" from which to obtain the authorization token.
+
+
+
+--domain-owner 123456789012: This specifies the owner (AWS account ID) of the CodeArtifact domain. Replace "123456789012" with the actual AWS account ID.
+
+
+
+--query authorizationToken: This is a query parameter used to extract the "authorizationToken" field from the output of the aws codeartifact get-authorization-token command.
+
+
+
+--output text: This specifies the output format of the AWS CLI command as plain text, which ensures that the authorization token is returned in a format that can be easily assigned to an environment variable.
+
+
+
+In a nutshell, this command retrieves an AWS CodeArtifact authorization token for a specific CodeArtifact domain and domain owner, extracts the token from the command's output, and assigns it to the CODEARTIFACT_AUTH_TOKEN environment variable. This authorization token can then be used to authenticate and access AWS CodeArtifact repositories or resources within that domain.
+
+
+
+Once we authorize this, we have to update the settings.xml file. We have to create this file. Let’s do this in the Cloud9 terminal using the following commands.
+
+
+
+cd ~/environment/unicorn-web-project
+
+Go to the unicorn-web-project directory and create the file.
+
+
+
+echo $'<settings>\n</settings>' > settings.xml
+
+When we run this command, it will create a file named settings.xml in the current directory and populate it with the following content.
+
+
+
+<settings>
+
+</settings>
+
+
+
+We have to write a certain code in between this XML structure.
+
+
+
+Now open the settings.xml file in the Cloud9 directory tree and follow the remaining steps in the Connection instructions dialog in the CodeArtifact console including the mirror section.
+
+Write the following code in between the <settings></settings>.
+
+
+
+<settings>
+
+<profiles>
+
+<profile>
+
+<id>unicorns-unicorn-packages</id>
+
+<activation>
+
+<activeByDefault>true</activeByDefault>
+
+</activation>
+
+<repositories>
+
+<repository>
+
+<id>unicorns-unicorn-packages</id>
+
+<url>https://unicorns-123456789012.d.codeartifact.us-east-2.amazonaws.com/maven/unicorn-packages/</url>
+
+</repository>
+
+</repositories>
+
+</profile>
+
+</profiles>
+
+<servers>
+
+<server>
+
+<id>unicorns-unicorn-packages</id>
+
+<username>aws</username>
+
+<password>${env.CODEARTIFACT_AUTH_TOKEN}</password>
+
+</server>
+
+</servers>
+
+<mirrors>
+
+<mirror>
+
+<id>unicorns-unicorn-packages</id>
+
+<name>unicorns-unicorn-packages</name>
+
+<url>https://unicorns-123456789012.d.codeartifact.us-east-2.amazonaws.com/maven/unicorn-packages/</url>
+
+<mirrorOf>*</mirrorOf>
+
+</mirror>
+
+</mirrors>
+
+</settings>
+
+
+
+This code is an XML configuration file for configuring Maven.
+
+Let's break down the key sections and elements within this XML file.
+
+
+
+<profiles>: This section allows you to define profiles, which are sets of configuration settings that can be activated under specific conditions. In this case, a profile with the ID "unicorns-unicorn-packages" is defined.
+
+
+
+<activation>: This subsection specifies activation criteria. <activeByDefault>true</activeByDefault> means that this profile is active by default.
+
+
+
+<repositories>: This subsection allows you to define repositories for this profile. It includes a repository with the ID "unicorns-unicorn-packages" and a URL pointing to an AWS CodeArtifact repository.
+
+
+
+<servers>: This section is used to configure authentication information for accessing remote repositories or servers. In this case, a server with the ID "unicorns-unicorn-packages" is defined.
+
+
+
+<username>: This element specifies the username used for authentication, which is "aws."
+
+
+
+<password>: This element specifies the password used for authentication. Notably, it uses ${env.CODEARTIFACT_AUTH_TOKEN}, which suggests that the password is dynamically retrieved from an environment variable named CODEARTIFACT_AUTH_TOKEN.
+
+
+
+<mirrors>: This section allows you to configure mirror repositories, which can be used to redirect requests to different repository URLs.
+
+
+
+<mirror>: A mirror with the ID "unicorns-unicorn-packages" is defined.
+
+
+
+<name>: This element provides a name for the mirror.
+
+
+
+<url>: This specifies the URL of the mirror, which is pointing to the same AWS CodeArtifact repository.
+
+
+
+<mirrorOf>: The "mirrorOf" element indicates which requests should be mirrored. In this case, * means that all requests will be mirrored to this repository.
+
+
+
+Overall, this XML configuration file is used to set up Maven-specific settings for accessing and authenticating with our AWS CodeArtifact repository "unicorns-unicorn-packages." It ensures that the necessary repositories, servers, and mirrors are configured correctly for Maven to work with the specified AWS resources.
+
+
+
+Ensure to type in the correct URL in the above script.
+
+
+
+4.3 Compile and Test in Cloud9
+
+
+Now it’s time to verify if the application executes in the cloud9 environment. We have to use the Maven package command mvn.
+
+
+
+mvn -s settings.xml compile
+
+
+
+When we run this command, Maven will use the custom settings from "settings.xml" for configuration. It will execute the "compile" goal, which involves compiling the Java source code of the project according to the project's configuration and dependencies.
+
+
+
+mvn: This is the Maven command used to execute Maven goals and tasks. It is followed by one or more arguments that specify what Maven should do.
+
+
+
+-s settings.xml: This is an option (or flag) used with the mvn command to specify the location of the settings file to be used for the build. In this case, it tells Maven to use the custom settings file named "settings.xml" instead of the default settings.
+
+
+
+compile: This is the goal or phase that Maven is instructed to execute. The "compile" phase is a common Maven goal used to compile the source code of a project. During this phase, Java source code files (usually located in the "src/main/java" directory) are compiled into bytecode class files.
+
+
+
+This command is instructing Maven to perform the "compile" phase while using a custom settings file named "settings.xml."
+
+
+
+Execute the mvn command.
+
+
+
+If the build is successful, go back to the CodeArtifact console and refresh the page of the unicorn-packages repository. Here you will see the packages that are used during the build in the artifact repository. This means that they were downloaded from the public repository and are now available as a copy inside our CodeArtifact repository.
+
+
+
+So, now we have the necessary online software packages in our private CodeArtifact repository for all our future build projects.
+
+
+
+
+
+4.4 IAM Policy to access CodeArtifact
+However, for the projects to access and use these CodeArtifact packages, we have to define a IAM policy. So whenever any services need to access the contents of this CodeArtifact repository, we can simply attach this IAM policy to that particular service.
+
+
+
+Go to IAM console and click Policies in the menu.
+
+
+
+Click Create policy and select the JSON tab. Use the following policy code. This will ensure that other services such as CodeBuild will be able to read the packages in our CodeArtifact repository.
+
+
+
+{
+
+"Version": "2012-10-17",
+
+"Statement": [
+
+{
+
+"Effect": "Allow",
+
+"Action": [ "codeartifact:GetAuthorizationToken",
+
+"codeartifact:GetRepositoryEndpoint",
+
+"codeartifact:ReadFromRepository"
+
+],
+
+"Resource": "*"
+
+},
+
+{
+
+"Effect": "Allow",
+
+"Action": "sts:GetServiceBearerToken",
+
+"Resource": "*",
+
+"Condition": {
+
+"StringEquals": {
+
+"sts:AWSServiceName": "codeartifact.amazonaws.com"
+
+}
+
+}
+
+}
+
+]
+
+}
+
+
+
+This IAM policy code allows specific actions related to AWS CodeArtifact, such as getting authorization tokens and reading from repositories, and it further restricts the use of sts:GetServiceBearerToken to the AWS CodeArtifact service. The "Resource": "*" in both statements means these permissions apply globally across all AWS resources.
+
+
+
+Click on Next. Tags and then Review.
+
+
+
+Name the policy codeartifact-unicorn-consumer-policy and provide a meaningful description such as "Provides permissions to read from CodeArtifact".
+
+
+
+Click on Create policy.
+
+
+
+So now we have CodeArtifact’s working repositories that can be used by other services. Our next step is to create a deployable Java file using AWS CodeBuild.
+
+
+
+Task 5: Build Java deployable file using AWS CodeBuild
+Now we will build a AWS CodeBuild project and convert the Java source code into a deployable file called Java Web Application Archive (WAR) file. We have already discussed what a WAR file is and why we need to create this in the build phase. Do refer to the AWS CodeBuild chapter to revise the concept.
+
+
+
+We know that the build process generates output artifacts and we need a place to store these files. So we will create an Amazon S3 bucket.
+
+
+
+5.1: Create Amazon S3 bucket to store output artifacts.
+Go to Amazon S3 console and click on ‘Create Bucket’ and give the bucket a unique name e.g. unicorn-build-artifacts-12345.
+
+
+
+Keep all other options as default and click on Create bucket.
+
+
+
+5.2: Create AWS CodeBuild project
+Go to the AWS CodeBuild console.
+
+
+
+Under build projects select Create build project.
+
+
+
+Name the project unicorn-web-build and give a meaningful description. Below Additional configuration, add a tag with key team and value devops.
+
+
+
+Under source select AWS CodeCommit as the source provider and select the unicorn-web-project as the repository. The branch should be main with no Commit ID.
+
+
+
+Under environment choose to use a Managed image and set the following details.
+
+Operating System = Amazon Linux 2
+
+Runtime = Standard
+
+Image = aws/codebuild/amazonlinux2-x86_64-standard:3.0
+
+Image version = Always use the latest image for this runtime version
+
+Environment Type = Linux
+
+
+
+Select New service role and leave the Role name as default.
+
+
+
+Under Buildspec let’s leave the default option to Use a buildspec file. We discussed in earlier chapters that the buildspec file contains the instructions to carry out the build process. With this default option CodeBuild will look for this buildspec.yml. We will create this file in later sections of this project.
+
+
+
+Next under the ‘Artifacts’ section select Amazon S3 and choose the bucket name we created earlier. Type name as unicorn-web-build.zip. Let’s leave the other options as default. Ensure the artifact packaging is set to Zip.
+
+
+
+Under ‘Logs’ enable CloudWatch logs. Set the group name to unicorn-build-logs and the stream name to webapp. This setting will allow us to track the output of our build process in CloudWatch Logs.
+
+
+
+Click on create build project to complete the CodeBuild settings.
+
+5.3 Create buildspec.yml file
+We know that the buildspec.yml file has to be created at the root directory of the project folder. Let’s go back to Cloud9 terminal.
+
+
+
+Navigate to ~/environment/unicorn-web-project/ folder and create a new file called buildspec.yml. Ensure that this name matches the name we entered in the CodeBuild console. Following is the code to be written in the buildspec.yml file. Make sure to replace the domain-owner account ID with your own account ID.
+
+
+
+version: 0.2
+
+
+
+phases:
+
+install:
+
+runtime-versions:
+
+java: corretto8
+
+pre_build:
+
+commands:
+
+- echo Initializing environment
+
+- export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain unicorns --domain-owner 123456789012 --query authorizationToken --output text`
+
+build:
+
+commands:
+
+- echo Build started on `date`
+
+- mvn -s settings.xml compile
+
+post_build:
+
+commands:
+
+- echo Build completed on `date`
+
+- mvn -s settings.xml package
+
+artifacts:
+
+files:
+
+- target/unicorn-web-project.war
+
+discard-paths: no
+
+
+
+Let’s quickly understand what exactly this file does in the build process.
+
+
+
+version: This specifies the version of the pipeline configuration. In our case, it's using version 0.2 of the configuration format.
+
+
+
+phases: This section defines various phases or steps in the CI/CD pipeline, each with specific actions or commands to be executed.
+
+
+
+-install: This phase specifies runtime versions and configurations. It sets the Java runtime version to "corretto8."
+
+
+
+-pre_build: In this phase, commands are executed before the actual build process. It includes initializing the environment and exporting an AWS CodeArtifact authorization token to an environment variable named CODEARTIFACT_AUTH_TOKEN.
+
+
+
+-build: This phase contains commands related to the build process. It prints a message with the current date and then invokes Maven to compile a Java project using "settings.xml” file.
+
+
+
+-post_build: After the build, this phase executes commands. Similar to the build phase, it prints a message with the current date and then uses Maven to package the project.
+
+
+
+artifacts: This section specifies how artifacts generated during the build should be handled.
+
+
+
+-files: It lists the files that should be considered as artifacts. In our case, it is specifying a WAR (Web Application Archive) file located at "target/unicorn-web-project.war" as the primary artifact.
+
+
+
+-discard-paths: This setting determines whether to preserve directory paths when packaging the artifacts. "no" suggests that the directory paths should not be discarded.
+
+
+
+In summary, we can say that this buildspec.yml file represents a CI/CD pipeline definition that includes phases for installation, pre-build setup, the build process, and post-build actions. It compiles a Java project using Maven, exports an AWS CodeArtifact authorization token, and packages the project. The resulting WAR file is specified as the primary artifact to be retained.
+
+
+
+Let’s save the file. Type ‘:wq’ and exit the file. This command saves and exits the buildspec.yml file.
+
+
+
+Let us now commit and push these changes.
+
+
+
+Ensure you are in the project’s directory. If not, use the following navigation command.
+
+
+
+cd ~/environment/unicorn-web-project
+
+
+
+git add *
+
+git commit -m "Adding buildspec.yml file"
+
+git push -u origin main
+
+
+
+
+
+5.4 Modify the IAM policy
+We are referring to the CodeArtifact repository in this buildspec.yml file, we have to slightly modify the previously auto-generated IAM role. Remember this IAM role was created while we were doing settings in the CodeBuild console. Let’s go to the IAM console and locate the IAM role.
+
+
+
+In Roles in the menu on the left, search for codebuild-unicorn-web-build-service-role to locate the auto-generated role and click it.
+
+
+
+Then click on the Add permissions button and select Attach policies from the drop-down menu.
+
+
+
+Here, search for codeartifact-unicorn-consumer-policy, select the item, and click Attach policies.
+
+
+
+5.5 Test the build project
+Allright, we have set all the necessary inputs required for our build process. So let’s build our Java web app using CodeBuild.
+
+
+
+Go to the AWS CodeBuild console.
+
+
+
+Select the unicorn-web-build project and select Start build > Start now.
+
+
+
+Monitor the logs and wait for the build status to complete. Once the status turns to ‘Succeeded’, go to S3 bucket console and check for the generated artifact. The S3 bucket should contain a WAR file inside a zip named unicorn-web-project.zip.
+
+
+
+That’s it, our build project has generated the output and we will use this output artifact for the next stages in this CICD project.
+
+
+
+At this stage we have our source code in CodeCommit, the packages in CodeArtifact, build project in CodeBuild and artifact in S3 bucket. Right now things are all in manual mode, we will automate all these in later stages.
+
+
+
+Now let’s deploy the WAR file using AWS CodeDeploy.
+
+
+
+Task 6: Deploy using AWS CodeDeploy
+We will use Amazon EC2 for the deployment. Let's go to the AWS CodeDeploy console.
+
+
+
+6.1 Create EC2 instance
+
+
+First go to the CloudFormation console. Create a new text file in your local machine. Copy and paste the following CloudFormation YAML template and save it.
+
+
+
+---
+
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+
+AmazonLinuxAMIID:
+
+Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+
+Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+
+MyIP:
+
+Type: String
+
+Description: My IP address e.g. 1.2.3.4/32 for Security Group HTTP access rule. Get your IP from http://checkip.amazonaws.com/.
+
+AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/32
+
+ConstraintDescription: must be a valid IP address of the form x.x.x.x/32
+
+
+
+Resources:
+
+VPC:
+
+Type: AWS::EC2::VPC
+
+Properties:
+
+CidrBlock: 10.11.0.0/16
+
+EnableDnsHostnames: true
+
+EnableDnsSupport: true
+
+Tags:
+
+- Key: 'Name'
+
+Value: !Join ['', [!Ref 'AWS::StackName', '::VPC'] ]
+
+
+
+InternetGateway:
+
+Type: AWS::EC2::InternetGateway
+
+Properties:
+
+Tags:
+
+- Key: 'Name'
+
+Value: !Join ['', [!Ref 'AWS::StackName', '::InternetGateway'] ]
+
+
+
+VPCGatewayAttachment:
+
+Type: AWS::EC2::VPCGatewayAttachment
+
+Properties:
+
+VpcId: !Ref VPC
+
+InternetGatewayId: !Ref InternetGateway
+
+
+
+PublicSubnetA:
+
+Type: AWS::EC2::Subnet
+
+Properties:
+
+AvailabilityZone: !Select
+
+- 0
+
+- Fn::GetAZs: !Ref 'AWS::Region'
+
+VpcId: !Ref VPC
+
+CidrBlock: 10.11.0.0/20
+
+MapPublicIpOnLaunch: true
+
+Tags:
+
+- Key: 'Name'
+
+Value: !Join ['', [!Ref 'AWS::StackName', '::PublicSubnetA'] ]
+
+
+
+PublicRouteTable:
+
+Type: AWS::EC2::RouteTable
+
+Properties:
+
+VpcId: !Ref VPC
+
+Tags:
+
+- Key: 'Name'
+
+Value: !Join ['', [!Ref 'AWS::StackName', '::PublicRouteTable'] ]
+
+
+
+PublicInternetRoute:
+
+Type: AWS::EC2::Route
+
+DependsOn: VPCGatewayAttachment
+
+Properties:
+
+DestinationCidrBlock: 0.0.0.0/0
+
+GatewayId: !Ref InternetGateway
+
+RouteTableId: !Ref PublicRouteTable
+
+
+
+PublicSubnetARouteTableAssociation:
+
+Type: AWS::EC2::SubnetRouteTableAssociation
+
+Properties:
+
+RouteTableId: !Ref PublicRouteTable
+
+SubnetId: !Ref PublicSubnetA
+
+
+
+PublicSecurityGroup:
+
+Type: AWS::EC2::SecurityGroup
+
+Properties:
+
+VpcId:
+
+Ref: VPC
+
+GroupDescription: Access to our Web server
+
+SecurityGroupIngress:
+
+- Description: Enable HTTP access via port 80 IPv4
+
+IpProtocol: tcp
+
+FromPort: '80'
+
+ToPort: '80'
+
+CidrIp: !Ref MyIP
+
+SecurityGroupEgress:
+
+- Description: Allow all traffic egress
+
+IpProtocol: -1
+
+CidrIp: 0.0.0.0/0
+
+Tags:
+
+- Key: 'Name'
+
+Value: !Join ['', [!Ref 'AWS::StackName', '::PublicSecurityGroup'] ]
+
+
+
+ServerRole:
+
+Type: AWS::IAM::Role
+
+Properties:
+
+AssumeRolePolicyDocument:
+
+Version: "2012-10-17"
+
+Statement:
+
+-
+
+Effect: "Allow"
+
+Principal:
+
+Service:
+
+- "ec2.amazonaws.com"
+
+Action:
+
+- "sts:AssumeRole"
+
+Path: "/"
+
+ManagedPolicyArns:
+
+- "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+
+- "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+
+
+
+DeployRoleProfile:
+
+Type: AWS::IAM::InstanceProfile
+
+Properties:
+
+Path: "/"
+
+Roles:
+
+-
+
+Ref: ServerRole
+
+
+
+WebServer:
+
+Type: AWS::EC2::Instance
+
+Properties:
+
+ImageId: !Ref AmazonLinuxAMIID
+
+InstanceType: t2.micro
+
+IamInstanceProfile: !Ref DeployRoleProfile
+
+NetworkInterfaces:
+
+- AssociatePublicIpAddress: true
+
+DeviceIndex: 0
+
+GroupSet:
+
+- Ref: PublicSecurityGroup
+
+SubnetId:
+
+Ref: PublicSubnetA
+
+Tags:
+
+- Key: 'Name'
+
+Value: !Join ['', [!Ref 'AWS::StackName', '::WebServer'] ]
+
+- Key: 'role'
+
+Value: 'webserver'
+
+
+
+Outputs:
+
+URL:
+
+Value:
+
+Fn::Join:
+
+- ''
+
+- - http://
+
+- Fn::GetAtt:
+
+- WebServer
+
+- PublicIp
+
+Description: Unicorn web server
+
+—
+
+
+
+
+
+In the CloudFormation Console, click Create stack > with new resources (standard).
+
+
+
+Select Upload a template file and click Choose file. Choose the yaml file that you just created and click Next.
+
+
+
+Give a name to the stack UnicornStack and provide your IP address from http://checkip.amazonaws.com/ in the format 1.2.3.4/32 when prompted.
+
+
+
+Keep all the remaining defaults as it is.
+
+
+
+Acknowledge the IAM resources checkbox before clicking Create stack.
+
+
+
+Wait for the stack to complete. This should take 3-5 minutes.
+
+
+
+Once successful, search for "EC2" in the AWS Console and click on Instances (running). You will see one instance named UnicornStack::WebServer.
+
+
+
+6.2 Create scripts to run the application
+Now we have to create some bash scripts in our Git repository. CodeDeploy uses these scripts to setup and deploy the application on the target EC2 instance.
+
+
+
+We will do this in Cloud9.
+
+
+
+Go to the Cloud9 IDE.
+
+
+
+Let’s create a new folder with name scripts under ~/environment/unicorn-web-project/.
+
+
+
+Then create a file with the name install_dependencies.sh file in the scripts folder and add the following script lines to it.
+
+
+
+#!/bin/bash
+
+sudo yum install tomcat -y
+
+sudo yum -y install httpd
+
+sudo cat << EOF > /etc/httpd/conf.d/tomcat_manager.conf
+
+<VirtualHost *:80>
+
+ServerAdmin root@localhost
+
+ServerName app.wildrydes.com
+
+DefaultType text/html
+
+ProxyRequests off
+
+ProxyPreserveHost On
+
+ProxyPass / http://localhost:8080/unicorn-web-project/
+
+ProxyPassReverse / http://localhost:8080/unicorn-web-project/
+
+</VirtualHost>
+
+EOF
+
+
+
+Then create another file with the name start_server.sh file in the scripts folder and add the following script lines to it.
+
+
+
+#!/bin/bash
+
+sudo systemctl start tomcat.service
+
+sudo systemctl enable tomcat.service
+
+sudo systemctl start httpd.service
+
+sudo systemctl enable httpd.service
+
+
+
+Then create one more file with the name stop_server.sh file in the scripts folder and add the following script lines to it.
+
+
+
+#!/bin/bash
+
+isExistApp="$(pgrep httpd)"
+
+if [[ -n $isExistApp ]]; then
+
+sudo systemctl stop httpd.service
+
+fi
+
+isExistApp="$(pgrep tomcat)"
+
+if [[ -n $isExistApp ]]; then
+
+sudo systemctl stop tomcat.service
+
+fi
+
+
+
+Now we need to draft the most important script for the deployment stage which is the AppSpec file. We have already discussed the importance of this file in the CodeDeploy chapter. It specifies what actions to take during a deployment, and defines which files from the source are placed where at the target destination.
+
+
+
+Remembe the AppSpec file must be named appspec.yml and placed in the root directory of the source code.
+
+
+
+Now create a new file with the name appspec.yml in the ~/environment/unicorn-web-project/ folder and add the following script lines to it.
+
+
+
+version: 0.0
+
+os: linux
+
+files:
+
+- source: /target/unicorn-web-project.war
+
+destination: /usr/share/tomcat/webapps/
+
+hooks:
+
+BeforeInstall:
+
+- location: scripts/install_dependencies.sh
+
+timeout: 300
+
+runas: root
+
+ApplicationStart:
+
+- location: scripts/start_server.sh
+
+timeout: 300
+
+runas: root
+
+ApplicationStop:
+
+- location: scripts/stop_server.sh
+
+timeout: 300
+
+runas: root
+
+
+
+Now we have to ensure that the newly added scripts folder and appspec.yml file are available to CodeDeploy, we need to add them to the zip file that CodeBuild creates. This is done by modifying the artifacts section in the buildspec.yml.
+
+
+
+Let’s do this. Go to buildspec.yml file and add 2 extra lines as below.
+
+
+
+phases:
+
+[..]
+
+
+
+artifacts:
+
+files:
+
+- target/unicorn-web-project.war
+
+- appspec.yml
+
+- scripts/**/*
+
+discard-paths: no
+
+
+
+Now commit all the changes to CodeCommit.
+
+
+
+cd ~/environment/unicorn-web-project
+
+git add *
+
+git commit -m "Adding CodeDeploy files"
+
+git push -u origin main
+
+
+
+Now we have to go to CodeBuild console and build the project to accommodate all the changes that we just made. So click on Start build to run the build project unicorn-web-build in CodeBuild console.
+
+6.3 Create CodeBuild service IAM Role
+Now CodeDeploy needs a service role to grant its permissions to the desired compute platform. For EC2/On-Premises deployments we will use the AWS Managed AWSCodeDeployRole policy.
+
+
+
+Go to the IAM console, choose Roles and click on Create role.
+
+
+
+Choose Trusted entity as AWS service ,choose CodeDeploy as the service and then select CodeDeploy for the use case. Click Next.
+
+
+
+Accept the AWSCodeDeployRole default policy.
+
+
+
+Click Next and give a name to the role as UnicornCodeDeployRole.
+
+
+
+Then click Create role to finish.
+
+
+
+6.4 Create CodeDeploy application
+With our necessary files in position, it's time to establish a CodeDeploy application. An application in CodeDeploy is nothing but a container or a name used by CodeDeploy to guarantee the accurate revision, deployment configuration, and deployment group are linked during a deployment.
+
+
+
+Go to CodeDeploy console and choose "Applications" and proceed to "Create application."
+
+
+
+Assign the name "unicorn-web-deploy" to the application and opt for "EC2/On-premises" as the Compute platform, although alternatives for AWS Lambda and Amazon ECS are also available. Finally, click "Create application."
+
+
+
+6.5 Create Deployment group
+Let's create a deployment group, which contains settings and configurations used during the deployment. It defines for example that our deployment shall target any EC2 instances with a specific tag.
+
+
+
+Under the unicorn-web-deploy application in the Deployment groups tab click Create deployment group.
+
+
+
+Configure the following options.
+
+
+
+Name = unicorn-web-deploy-group
+
+Service role = arn:aws:iam::<aws-account-id>:role/UnicornCodeDeployRole
+
+Deployment type = In-place
+
+Environment configuration = Amazon EC2 instances
+
+Tag group 1 Key = role
+
+Tag group 1 Value = webserver
+
+Install AWS CodeDeploy Agent = Now and schedule updates (14 days)
+
+Deployment settings = CodeDeployDefault.AllAtOnce
+
+Load balancer = Uncheck Enable load balancing (we just have one server)
+
+
+
+Then click on Create deployment group.
+
+
+
+6.6 Create Deployment
+
+
+After creating our deployment group, i.e. defining the resources that we want to deploy, we can now create a deployment!
+
+
+
+In the unicorn-web-deploy-group click Create deployment.
+
+
+
+For the revision location use the S3 bucket that we created earlier.
+
+
+
+The URL will look like this.
+
+
+
+s3://<my-artifact-bucket-name>/unicorn-web-build.zip
+
+
+
+Then select the revision file type as .zip.
+
+
+
+Keep the other settings as default and click on Create deployment.
+
+
+
+The deployment will now begin. Keep an eye on the deployment lifecycle events and check it completes successfully.
+
+
+
+Finally check that the web application is working by browsing to http://<public-ip-address>. You will get the public IP address from the instance details Networking tab. Remember that if you click the open address link this will default to https and needs to be changed to http.
+
+
+
+So here, we are now able to access the web application.
+
+
+
+So now we have built and deployed our Java web application. All this we did manually. We have to automate all these processes. If we make any changes in CodeCommit, the changes should be reflected in the end result without any human intervention.
+
+
+
+So this is where we will use the AWS CodePipeline.
+
+
+
+Task 7: Automate using AWS CodePipleine
+Now we will use CodePipeline to create an automated pipeline using the CodeCommit, CodeBuild and CodeDeploy components created earlier. The pipeline will be triggered when a new commit is pushed to the main branch of our Git repo.
+
+
+
+7.1 Create Pipeline
+Go to the CodePipeline console.
+
+
+
+Under Pipelines choose Create pipeline.
+
+
+
+Enter unicorn-web-pipeline as the pipeline name. Choose to create a new service role and use the auto generated name. Leave other settings as default and click Next.
+
+
+
+Under the source provider select AWS CodeCommit and select the unicorn-web-project as the repository. Set the branch name to be main. Leave the detection option as Amazon CloudWatch Events and the output artifact format to be CodePipeline default. Click Next.
+
+
+
+On the build stage screen select AWS CodeBuild as the build provider and unicorn-web-build as the project name. Leave the build type as Single build. Click Next.
+
+
+
+On the deploy stage screen select AWS CodeDeploy as the deploy provider and unicorn-web-deploy as the application name. Select unicorn-web-deploy-group as the deployment group. Click Next.
+
+
+
+Review the pipeline settings and click Create pipeline. Once you click create, the whole pipeline will run for the first time. Ensure it completes successfully.
+
+
+
+7.2 Release a change
+
+
+
+All right we have a fully managed CICD pipeline now. Let’s test it. We will make some changes in the CodeCommit and see if these changes are automatically updated in the pipeline.
+
+
+
+Go to Cloud9 environment.
+
+
+
+Update the index.jsp with the below html code.
+
+
+
+<!doctype html>
+
+
+
+<html lang="en">
+
+<head>
+
+<meta charset="utf-8">
+
+<style>
+
+body{
+
+font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+}
+
+.site-header .title{
+
+background: url(images/wr-home-top.jpg) no-repeat top;
+
+background-size: cover;
+
+padding-bottom: 70.2753441802%;
+
+margin: 0;
+
+text-indent: -999em;
+
+position: relative;
+
+}
+
+.home-about {
+
+background: #f50856;
+
+color: #fff;
+
+padding: 5rem 0;
+
+text-align: center;
+
+}
+
+</style>
+
+<title>Wild Rydes</title>
+
+</head>
+
+
+
+<body>
+
+<header class="site-header">
+
+<h1 class="title">Wild Rydes</h1>
+
+</header>
+
+<section class="home-about">
+
+
+
+<h2 class="section-title">How Does This Work?</h2>
+
+<p class="content">
+
+In today's fast paced world, you've got places you need to be but not enough time in your jam packed schedule. Wouldn't it be nice if there were a transportation service that changed the way you get around daily? Introducing Wild Rydes, an innovative transportation service that helps people get to their destination faster and hassle-free. Getting started is as easy as tapping a button in our app.
+
+</p>
+
+<h2 class="section-title">Our Story</h2>
+
+<p class="content">
+
+Wild Rydes was started by a former hedge fund analyst and a software developer. The two long-time friends happened upon the Wild Rydes idea after attending a silent yoga retreat in Nevada. After gazing upon the majestic herds of unicorns prancing across a surreal Nevada sunset, they witnessed firsthand the poverty and unemployment endemic to that once proud race. Whether it was modern society's reliance on science over magic or not, we'll never know the cause of their Ozymandian downfall and fade to obscurity. Moved by empathy, romance, and free enterprise, they saw an opportunity to marry society's demand for faster, more flexible transportation to underutilized beasts of labor through an on-demand market making transportation app. Using the founders' respective expertise in animal husbandry and software engineering, Wild Rydes was formed and has since raised untold amounts of venture capital. Today, Wild Rydes has thousands of unicorns in its network fulfilling hundreds of rydes each day.
+
+</p>
+
+</section>
+
+
+
+
+
+</body>
+
+</html>
+
+
+
+Download the background image and save it to your local machine. Then create a new folder images below unicorn-web-project/src/main/webapp/images/ and upload the file via Cloud9 using File > Upload Local File…
+
+
+
+Link to download background image.
+
+
+
+Commit the changes using the command below.
+
+
+
+cd ~/environment/unicorn-web-project/
+
+git add *
+
+git commit -m "Visual improvements to homepage"
+
+git push -u origin main
+
+
+
+Check back in the CodePipeline console. The pipeline should be triggered by the push automatically. Wait for the pipeline to complete successfully.
+
+
+
+Once the pipeline has finished, browse to the EC2 public IP address http://<ip-address>/ to see the changes.
+
+
+
+Congratulations! There you are. You have a working CICD pipeline.
+
+
+
+Conclusion
+Well done! You've finished the project.
+
+
+
+Throughout this project, you've delved into the utilization of AWS CodeCommit for Git repositories and AWS CodeArtifact for build artifacts. You've established a build workflow employing AWS CodeBuild and mastered deployment management with AWS CodeDeploy. Plus, you've gained the know-how to integrate these services seamlessly into a fully managed CI/CD pipeline, all thanks to AWS CodePipeline.
