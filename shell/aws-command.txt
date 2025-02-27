@@ -1,0 +1,7 @@
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+
+
+•	AWS Access Key ID: (Paste the key from AWS IAM)
+•	AWS Secret Access Key: (Paste the secret key)
+•	Default region: (e.g., us-east-1, eu-west-1, check your AWS region)
+•	Output format: (json, table, or text)
