@@ -1,7 +1,7 @@
 # 🚀 Formation DevOps 100 Jours Par Donald Programmeur
 
 ## Playlist 
-![video](https://youtu.be/z8aLToy0-WE?feature=shared)
+📺 [YouTube Video](https://youtu.be/z8aLToy0-WE)
 
 ![DevOps Banner](https://raw.githubusercontent.com/donaldte/Formation-Devops/refs/heads/main/devops%20barnner.jpg)
 
