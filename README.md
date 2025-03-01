@@ -1,9 +1,4 @@
-Voici un **README.md** bien structuré pour ton dépôt de formation DevOps **donaldte**, intégrant une belle présentation avec des images, des badges et une table des matières.
-
----
-
-## 📌 **README.md Structuré**
-```md
+Voici un **README.md** bien structuré pour ton dépôt de formation DevOps **donaldte**, 
 # 🚀 Formation DevOps – donaldte
 
 ![DevOps Banner](https://raw.githubusercontent.com/donaldte/donaldte/main/assets/devops_banner.png)
@@ -96,4 +91,3 @@ Ce projet est sous licence **MIT**. Tu peux l'utiliser, le modifier et le redist
 
 🚀 **Prêt à apprendre et pratiquer DevOps ? Plonge dans le code et explore les scripts !** 🎯
 ```
----
