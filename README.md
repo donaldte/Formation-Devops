@@ -1,4 +1,7 @@
-# 🚀 Formation DevOps – donaldte
+# 🚀 Formation DevOps Par Donald Programmeur
+
+## Playlist 
+![](https://youtu.be/z8aLToy0-WE?feature=shared)
 
 ![DevOps Banner](https://raw.githubusercontent.com/donaldte/Formation-Devops/refs/heads/main/devops%20barnner.jpg)
 
