@@ -82,7 +82,7 @@ Nous encourageons les contributions ! Voici comment tu peux aider :
 ## ⚡ **Auteur**
 👤 **Donald Tedom**
 - 🔗 [GitHub](https://github.com/donaldte)
-- 📧 donaldte@gmail.com
+- 📧 donaldtedom0@gmail.com
 
 ---
 
