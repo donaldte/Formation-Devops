@@ -1,7 +1,7 @@
 Voici un **README.md** bien structuré pour ton dépôt de formation DevOps **donaldte**, 
 # 🚀 Formation DevOps – donaldte
 
-![DevOps Banner](https://raw.githubusercontent.com/donaldte/donaldte/main/assets/devops_banner.png)
+![DevOps Banner](https://raw.githubusercontent.com/donaldte/Formation-Devops/refs/heads/main/devops%20barnner.jpg)
 
 ## 🛠️ Présentation
 
@@ -65,7 +65,7 @@ Ce projet couvre plusieurs technologies et concepts :
 ---
 
 ## 📸 **Aperçu**
-![DevOps Workflow](https://raw.githubusercontent.com/donaldte/donaldte/main/assets/devops_workflow.png)
+![DevOps Workflow](https://raw.githubusercontent.com/donaldte/Formation-Devops/refs/heads/main/devops%20workflow.png)
 
 ---
 
