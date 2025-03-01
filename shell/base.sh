@@ -71,3 +71,6 @@ Linux signal :
 Trap “echo don’t use the ctrl+c” SIGINT 
 Trap ‘rm -rf *’ SIGINT
 
+
+
+
