@@ -1,4 +1,3 @@
-Voici un **README.md** bien structuré pour ton dépôt de formation DevOps **donaldte**, 
 # 🚀 Formation DevOps – donaldte
 
 ![DevOps Banner](https://raw.githubusercontent.com/donaldte/Formation-Devops/refs/heads/main/devops%20barnner.jpg)
