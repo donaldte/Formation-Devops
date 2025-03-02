@@ -1,0 +1,42 @@
+200 
+
+1- EC2 ( Elastic Compute cloud)
+  advantage( ht scalabilite, flexiblitte, control total, integration facile avec d'autre service aws)
+
+2- VPC(virtual private cloud) 
+   
+3 EBS (elastic block store)(volume) *
+
+4- S3 (simple storage service)
+    cloudfront pour le cdn 
+
+5- IAM (Identity and access management)
+  centralisee des access , MFA
+
+6- CloudWatch (Monitoring) via SNS, Lamdda
+
+7- cloudTrail(Gouvenance, Compliance, Audit)
+    aws security hub 
+
+8- Lambda (serverless computing)  *  
+
+    upload(s3) ---> thunmail ---> HD ---> renvoyer la video client
+
+
+9- cloud build services(codebuild, codedeploy , codepipeline)  jenkins  
+
+
+10- aws config(audit de configuration)
+
+11 - aws billing and costing *
+
+
+12- aws KMS (key management service)
+
+13- aws EKS (Elastic Kubernetes services)
+
+14- asws ecs (elastic container services)
+
+15- aws fargate ecs en fargate mode
+
+16 ELK 9 elastic search (elasticsearch, logstash, kibana, )
