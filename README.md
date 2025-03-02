@@ -1,5 +1,7 @@
-Voici un **README.md** bien structuré pour ton dépôt de formation DevOps **donaldte**, 
-# 🚀 Formation DevOps – donaldte
+# 🚀 Formation DevOps 100 Jours Par Donald Programmeur
+
+## Playlist 
+📺 [YouTube Video](https://youtu.be/z8aLToy0-WE)
 
 ![DevOps Banner](https://raw.githubusercontent.com/donaldte/Formation-Devops/refs/heads/main/devops%20barnner.jpg)
 
@@ -80,7 +82,7 @@ Nous encourageons les contributions ! Voici comment tu peux aider :
 ## ⚡ **Auteur**
 👤 **Donald Tedom**
 - 🔗 [GitHub](https://github.com/donaldte)
-- 📧 donald@example.com
+- 📧 donaldtedom0@gmail.com
 
 ---
 
@@ -90,4 +92,4 @@ Ce projet est sous licence **MIT**. Tu peux l'utiliser, le modifier et le redist
 ---
 
 🚀 **Prêt à apprendre et pratiquer DevOps ? Plonge dans le code et explore les scripts !** 🎯
-```
+
