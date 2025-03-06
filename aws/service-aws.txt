@@ -40,3 +40,5 @@
 15- aws fargate ecs en fargate mode
 
 16 ELK 9 elastic search (elasticsearch, logstash, kibana, )
+
+
