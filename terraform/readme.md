@@ -162,3 +162,37 @@ module "ec2_instance" {
 
 Ce cours détaillé couvre tout ce dont vous avez besoin pour bien maîtriser Terraform et vous préparer à l'utiliser en entreprise ou en entretien technique.
 
+
+
+Voici les commandes AWS CLI pour créer le bucket S3 et la table DynamoDB nécessaires pour le backend Terraform :
+
+### 1️⃣ **Créer le bucket S3**
+```sh
+aws s3api create-bucket --bucket my-terraform-backend-youtube --region us-west-2 --create-bucket-configuration LocationConstraint=us-west-2
+```
+📌 *Cette commande crée un bucket nommé `my-terraform-backend-youtube` dans la région `us-west-2`.*
+
+### 2️⃣ **Activer le chiffrement du bucket S3**
+```sh
+aws s3api put-bucket-encryption --bucket my-terraform-backend-youtube --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
+```
+📌 *Cette commande active le chiffrement des objets avec `AES256` pour sécuriser le backend de Terraform.*
+
+### 3️⃣ **Activer la versioning sur le bucket S3**
+```sh
+aws s3api put-bucket-versioning --bucket my-terraform-backend-youtube --versioning-configuration Status=Enabled
+```
+📌 *Cela permet de conserver l'historique des fichiers Terraform state.*
+
+### 4️⃣ **Créer la table DynamoDB pour le verrouillage de l’état**
+```sh
+aws dynamodb create-table \
+    --table-name terraform-lock \
+    --attribute-definitions AttributeName=LockID,AttributeType=S \
+    --key-schema AttributeName=LockID,KeyType=HASH \
+    --billing-mode PAY_PER_REQUEST \
+    --region us-west-2
+```
+📌 *Cela crée une table `terraform-lock` avec une clé primaire `LockID`, utilisée pour le verrouillage du state.*
+
+Une fois ces commandes exécutées, ton backend Terraform sera prêt à être utilisé. 🚀
