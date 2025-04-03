@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to create an S3 bucket for YouTube video storage.
+Parameters:
+  BucketName:
+    Type: String
+    Description: The name of the S3 bucket to create.
+    Default: my-s3-youtube-bucket-test
+
+  AccessControl:
+    Type: String
+    Description: The access control for the S3 bucket.
+    Default: Private
+    AllowedValues:
+      - Private
+      - PublicRead
+      - PublicReadWrite
+Resources:
+  MyS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref "BucketName"
+      AccessControl: !Ref AccessControl
+   
+
+
+  

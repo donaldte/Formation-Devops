@@ -42,3 +42,24 @@
         }
     ]
 }
+
+
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowAccessToDonaldDevOps",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::769749267333:user/donald-devops"
+      },
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::app1-youtube-testing-localhost",
+        "arn:aws:s3:::app1-youtube-testing-localhost/*"
+      ]
+    }
+  ]
+}
+
