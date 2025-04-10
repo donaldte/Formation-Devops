@@ -193,7 +193,7 @@ Cela signifie que Docker n’est pas lancé ou que vous n’avez pas les droits 
 ### Cloner ce dépôt et aller dans le dossier `examples`
 
 ```bash
-git clone [https://github.com/donaldte/Docker-Zero-to-Hero](https://github.com/donaldte/Formation-Devops.git)
+git clone (https://github.com/donaldte/Formation-Devops.git)
 cd docker / cd firt-project-file
 ```
 
