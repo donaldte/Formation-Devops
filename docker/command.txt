@@ -1,0 +1,16 @@
+docker build .
+docker build /path/dockerfile 
+docker build -t name:tag 
+docker run id_image 
+docker run -it id_image 
+docker run -d id_image 
+docker run -d -p port:mapping_port -it id_image 
+docker stop id_container 
+docker restart id_container 
+docker logs id_container 
+docker logs -f id_container 
+docker exec -it it_container bash 
+docker ps -a 
+docker images 
+docker rmi id_image 
+docker rm id_container
