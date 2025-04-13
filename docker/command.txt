@@ -14,3 +14,5 @@ docker ps -a
 docker images 
 docker rmi id_image 
 docker rm id_container
+docker logs id_container 
+docker logs -f id_container 
