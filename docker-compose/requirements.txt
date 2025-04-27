@@ -2,3 +2,4 @@ Django>=4.0
 gunicorn
 redis
 python-decouple
+psycopg2-binary
