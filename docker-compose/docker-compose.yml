@@ -6,7 +6,7 @@ services:
   # Premier serveur web (par exemple une app Python)
   web1:
     build: .  # Construit l'image Docker à partir du Dockerfile dans le même dossier
-    command: ./entrypoint.sh  # Commande qui sera exécutée à la création du conteneur
+    command: /entrypoint.sh  # Commande qui sera exécutée à la création du conteneur
     container_name: web1  # Nom du conteneur
     restart: always  # Redémarre automatiquement si le conteneur tombe
     volumes:
@@ -25,7 +25,7 @@ services:
   # Deuxième serveur web (copie de web1 mais autre port externe)
   web2:
     build: .
-    command: ./entrypoint.sh
+    command: /entrypoint.sh
     container_name: web2
     restart: always
     volumes:
