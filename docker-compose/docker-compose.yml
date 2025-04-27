@@ -3,26 +3,31 @@ version: '3.9'
 # Définition des services (conteneurs)
 services:
 
-  # Premier serveur web (par exemple une app Python)
+  # Premier serveur web (application Python, Node.js, etc.)
   web1:
     build: .  # Construit l'image Docker à partir du Dockerfile dans le même dossier
-    container_name: web1  # Nom du conteneur
-    restart: always  # Redémarre automatiquement si le conteneur tombe
-    command: /entrypoint.sh  # Commande qui sera exécutée à la création du conteneur
+    container_name: web1  # Nom du conteneur pour l'identifier facilement
+    restart: always  # Redémarre automatiquement le conteneur si il crash
+    command: /entrypoint.sh  # Commande principale à exécuter au lancement
     volumes:
-      - .:/app  # Montre le dossier local ./app dans /app du conteneur
+      - .:/app  # Monte le dossier local ./ dans /app du conteneur (code source)
     ports:
-      - "8020:8000"  # Port externe 8020 --> port interne 8000
+      - "8020:8000"  # Redirige le port externe 8020 vers le port 8000 du conteneur
     environment:
-      - SERVER_NAME=web1  # Variable d'environnement envoyée au conteneur
+      - SERVER_NAME=${SERVER_NAME_WEB1}  # Variables d'environnement pour configurer l'app
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
     depends_on:
-      - redis  # web1 attend que redis soit prêt avant de démarrer
+      - redis  # Lance redis avant web1
+      - database  # Lance la base de données avant web1
     networks:
-      - mynetwork  # Connecté au réseau privé
-    stdin_open: true  # Garde stdin ouvert
-    tty: true         # Alloue un terminal au conteneur
+      - mynetwork  # Relie web1 au réseau interne mynetwork
+    stdin_open: true  # Garde le terminal ouvert (utile pour debug interactif)
+    tty: true         # Alloue un pseudo-TTY
 
-  # Deuxième serveur web (copie de web1 mais autre port externe)
+  # Deuxième serveur web (identique à web1, sur un autre port)
   web2:
     build: .
     container_name: web2
@@ -31,40 +36,65 @@ services:
     volumes:
       - .:/app
     ports:
-      - "8021:8000"  # Port externe 8021 --> port interne 8000
+      - "8021:8000"  # Redirige le port externe 8021 vers 8000 interne
     environment:
-      - SERVER_NAME=web2
+      - SERVER_NAME=${SERVER_NAME_WEB2}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
     depends_on:
       - redis
+      - database
     networks:
       - mynetwork
     stdin_open: true
     tty: true
 
-  # Service Redis (base de données en mémoire ultra rapide)
+  # Service Redis (base de données clé-valeur en mémoire ultra rapide)
   redis:
     image: redis:7  # Utilise l'image officielle Redis version 7
     container_name: redis
     restart: always
     networks:
-      - mynetwork  # Connecté au même réseau que les web apps
+      - mynetwork
 
-  # Serveur Nginx (load balancer + reverse proxy pour web1 et web2)
+  # Service PostgreSQL (base de données relationnelle)
+  database:
+    image: postgres:15  # Utilise l'image officielle PostgreSQL version 15
+    container_name: postgres_db
+    restart: always
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}  # Variables d'environnement pour configurer PostgreSQL
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persiste les données PostgreSQL sur le disque hôte
+    ports:
+      - "5432:5432"  # Permet de se connecter à PostgreSQL depuis l'extérieur
+    networks:
+      - mynetwork
+
+  # Serveur Nginx (reverse proxy / load balancer pour web1 et web2)
   nginx:
-    image: nginx:latest  # Dernière version de l'image Nginx
+    image: nginx:latest  # Utilise l'image officielle Nginx dernière version
     container_name: nginx
     restart: always
     ports:
-      - "80:80"  # Expose Nginx sur le port 80 (HTTP standard)
+      - "80:80"  # Expose Nginx sur le port 80 HTTP standard
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf  # Utilise ton fichier custom Nginx
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf  # Utilise ton fichier de configuration personnalisé
     depends_on:
       - web1
       - web2
     networks:
       - mynetwork
 
-# Définition du réseau privé pour permettre aux services de communiquer
+# Définition du réseau privé entre les services
 networks:
   mynetwork:
-    driver: bridge  # Utilise le réseau bridge Docker par défaut
+    driver: bridge  # Réseau bridge Docker classique pour la communication interne
+
+# Définition du volume persistant pour PostgreSQL
+volumes:
+  postgres_data:  # Volume pour stocker les données PostgreSQL de manière durable

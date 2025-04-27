@@ -74,13 +74,19 @@ WSGI_APPLICATION = 'application_web.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+from decouple import config
+
+# Configuration de la base de données
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',  # Utilisation du moteur PostgreSQL
+        'NAME': config('POSTGRES_DB'),              # Nom de la base de données
+        'USER': config('POSTGRES_USER'),             # Nom d'utilisateur
+        'PASSWORD': config('POSTGRES_PASSWORD'),     # Mot de passe
+        'HOST': config('POSTGRES_HOST'),             # Adresse du serveur (service Docker)
+        'PORT': config('POSTGRES_PORT', default='5432'),  # Port (avec valeur par défaut si absent)
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
