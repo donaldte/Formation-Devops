@@ -1,0 +1,58 @@
+version: '3.9'
+
+services:
+  web1:
+    build: .
+    container_name: web1
+    restart: always
+    volumes:
+      - ./app:/app
+    ports:
+      - "8020:8000"  # EXTERNE 8020 vers INTERNE 8000
+    environment:
+      - SERVER_NAME=web1
+    depends_on:
+      - redis
+    networks:
+      - mynetwork
+
+
+  web2:
+    build: .
+    container_name: web2
+    restart: always
+    volumes:
+      - ./app:/app
+    ports:
+      - "8021:8000"  # EXTERNE 8021 vers INTERNE 8000
+    environment:
+      - SERVER_NAME=web2
+    depends_on:
+      - redis
+    networks:
+      - mynetwork
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
+    networks:
+      - mynetwork
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - web1
+      - web2
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
