@@ -1,58 +1,70 @@
 version: '3.9'
 
+# Définition des services (conteneurs)
 services:
+
+  # Premier serveur web (par exemple une app Python)
   web1:
-    build: .
-    container_name: web1
-    restart: always
+    build: .  # Construit l'image Docker à partir du Dockerfile dans le même dossier
+    command: ./entrypoint.sh  # Commande qui sera exécutée à la création du conteneur
+    container_name: web1  # Nom du conteneur
+    restart: always  # Redémarre automatiquement si le conteneur tombe
     volumes:
-      - ./app:/app
+      - ./app:/app  # Montre le dossier local ./app dans /app du conteneur
     ports:
-      - "8020:8000"  # EXTERNE 8020 vers INTERNE 8000
+      - "8020:8000"  # Port externe 8020 --> port interne 8000
     environment:
-      - SERVER_NAME=web1
+      - SERVER_NAME=web1  # Variable d'environnement envoyée au conteneur
     depends_on:
-      - redis
+      - redis  # web1 attend que redis soit prêt avant de démarrer
     networks:
-      - mynetwork
+      - mynetwork  # Connecté au réseau privé
+    stdin_open: true  # Garde stdin ouvert
+    tty: true         # Alloue un terminal au conteneur
 
-
+  # Deuxième serveur web (copie de web1 mais autre port externe)
   web2:
     build: .
+    command: ./entrypoint.sh
     container_name: web2
     restart: always
     volumes:
       - ./app:/app
     ports:
-      - "8021:8000"  # EXTERNE 8021 vers INTERNE 8000
+      - "8021:8000"  # Port externe 8021 --> port interne 8000
     environment:
       - SERVER_NAME=web2
     depends_on:
       - redis
     networks:
       - mynetwork
+    stdin_open: true
+    tty: true
 
+  # Service Redis (base de données en mémoire ultra rapide)
   redis:
-    image: redis:7
+    image: redis:7  # Utilise l'image officielle Redis version 7
     container_name: redis
     restart: always
     networks:
-      - mynetwork
+      - mynetwork  # Connecté au même réseau que les web apps
 
+  # Serveur Nginx (load balancer + reverse proxy pour web1 et web2)
   nginx:
-    image: nginx:latest
+    image: nginx:latest  # Dernière version de l'image Nginx
     container_name: nginx
     restart: always
     ports:
-      - "80:80"
+      - "80:80"  # Expose Nginx sur le port 80 (HTTP standard)
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf  # Utilise ton fichier custom Nginx
     depends_on:
       - web1
       - web2
     networks:
       - mynetwork
 
+# Définition du réseau privé pour permettre aux services de communiquer
 networks:
   mynetwork:
-    driver: bridge
+    driver: bridge  # Utilise le réseau bridge Docker par défaut
