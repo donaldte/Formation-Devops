@@ -83,7 +83,7 @@ services:
     ports:
       - "80:80"  # Expose Nginx sur le port 80 HTTP standard
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf  # Utilise ton fichier de configuration personnalisé
+      - ./nginx/default.conf:/etc/nginx/cdonf./default.conf  # Utilise ton fichier de configuration personnalisé
     depends_on:
       - web1
       - web2
