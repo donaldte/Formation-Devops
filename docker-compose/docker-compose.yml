@@ -10,7 +10,7 @@ services:
     restart: always  # Redémarre automatiquement si le conteneur tombe
     command: /entrypoint.sh  # Commande qui sera exécutée à la création du conteneur
     volumes:
-      - ./app:/app  # Montre le dossier local ./app dans /app du conteneur
+      - .:/app  # Montre le dossier local ./app dans /app du conteneur
     ports:
       - "8020:8000"  # Port externe 8020 --> port interne 8000
     environment:
@@ -29,7 +29,7 @@ services:
     restart: always
     command: /entrypoint.sh
     volumes:
-      - ./app:/app
+      - .:/app
     ports:
       - "8021:8000"  # Port externe 8021 --> port interne 8000
     environment:
