@@ -83,7 +83,7 @@ services:
     ports:
       - "80:80"  # Expose Nginx sur le port 80 HTTP standard
     volumes:
-      - ./nginx/default.conf:/etc/nginx/cdonf./default.conf  # Utilise ton fichier de configuration personnalisé
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf  # Utilise ton fichier de configuration personnalisé
     depends_on:
       - web1
       - web2
@@ -98,3 +98,12 @@ networks:
 # Définition du volume persistant pour PostgreSQL
 volumes:
   postgres_data:  # Volume pour stocker les données PostgreSQL de manière durable
+
+
+# les commandes pour docker compose 
+# docker-compose up -d --build  # Lancer les conteneurs en arrière-plan et reconstruire les images
+# docker-compose down  # Arrêter et supprimer les conteneurs, réseaux et volumes
+# docker-compose logs  # Afficher les logs des conteneurs
+# docker exec web1 bash  # Accéder au terminal du conteneur web1
+# docker ps  # Afficher l'état des conteneurs
+# docker stop  # Arrêter les conteneurs sans les supprimer
