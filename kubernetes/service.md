@@ -339,9 +339,3 @@ Souhaites-tu que je t’enseigne :
 * 📦 Comment associer un Service à un StatefulSet (ex: base de données) ?
 * 🧪 Un projet pratique de fin de cours avec plusieurs types de services ?
 
-
-pod-->deployment ___> rs __> pod __>(ip(172.162.23.9)) autohealing (automit)(172...)
-
-service
-
-
