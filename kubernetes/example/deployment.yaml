@@ -15,6 +15,6 @@ spec:
       containers:
       - name: flask-container
         image: flask-k8s-app:latest
-        imagePullPolicy: Never  # <-- clé ici
+        imagePullPolicy: Never  # <-- clé ici(always, ifnotpresent)
         ports:
         - containerPort: 5000
