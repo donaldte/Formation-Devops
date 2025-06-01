@@ -1,0 +1,17 @@
+
+EKS(aws elastic kuberntes service) (control plan, worker )
+
+eks + Fargate(serverless) ou EC2
+
+kops , kubeadm, minikube etc 
+
+certificat, api server, etcd, kubectl, cluter, node ,  pod, service, deploy, rs 
+
+eks (vpc, subnet, table route, groupe, nat, igw)
+
+
+✅ Créé ton cluster EKS avec Fargate
+✅ Configuré le OIDC provider(s3, )
+✅ Créé le IAM policy et le service account
+✅ Déployé le AWS Load Balancer Controller
+✅ Déployé ton Deployment, Service et Ingress
