@@ -1,9 +1,0 @@
-metadata:
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-spec:
-  tls:
-  - hosts:
-    - monapp.com
-    secretName: monapp-tls
-
