@@ -92,4 +92,3 @@ Ce projet est sous licence **MIT**. Tu peux l'utiliser, le modifier et le redist
 ---
 
 🚀 **Prêt à apprendre et pratiquer DevOps ? Plonge dans le code et explore les scripts !** 🎯
-
