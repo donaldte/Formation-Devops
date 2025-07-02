@@ -15,5 +15,7 @@ spec:
       containers:
         - name: flask-container
           image: flask-configmap-app
+          imagePullPolicy: Never
+
           ports:
             - containerPort: 5000
