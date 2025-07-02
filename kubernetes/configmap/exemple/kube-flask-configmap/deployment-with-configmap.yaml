@@ -18,10 +18,9 @@ spec:
           imagePullPolicy: Never
           ports:
             - containerPort: 5000
-
           env:
-          - name: FLASK_PORT
-            valueFrom:
-              configMapKeyRef:
-                name: flask-config
-                key: FLASK_PORT
+            - name: FLASK_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: flask-config
+                  key: FLASK_PORT
