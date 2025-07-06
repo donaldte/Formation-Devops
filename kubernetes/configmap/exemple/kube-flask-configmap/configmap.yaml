@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: flask-config
 data:
-  FLASK_PORT: "5001"
+  FLASK_PORT: "5002"
