@@ -322,3 +322,4 @@ kubectl apply -f service.yaml
 
 minikube service flask-service
 ```
+kubectl exec -it flask-secret-app-xxxx -- printenv FLASK_SECRET_PORT
