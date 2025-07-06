@@ -1,6 +1,4 @@
-Parfait. Voici l’exercice **complet et structuré étape par étape**, avec **tout le code et toutes les commandes à exécuter**, sans aucune coupure ni saut.
 
----
 
 ## 🧪 **Objectif**
 
