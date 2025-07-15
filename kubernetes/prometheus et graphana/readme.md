@@ -174,8 +174,12 @@ helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
 ### Obtenir les URLs :
 
 ```bash
+# Accès à Prometheus
+minikube service monitoring-kube-prometheus-prometheus --url
+
+# Accès à Grafana
 minikube service monitoring-grafana --url
-minikube service monitoring-kube-prometheus-stack-prometheus --url
+
 ```
 
 ---
@@ -253,4 +257,46 @@ kubectl rollout restart deployment monitoring-kube-prometheus-stack-prometheus
 
 # Vérifier les metrics Flask
 curl http://<ip-node>:<nodeport>/metrics
+```
+
+
+
+### 📋 Redirection des Ports avec Socat**
+
+Dans ce script, nous utilisons la commande **socat** pour rediriger des ports internes de Minikube vers l'extérieur (accessible depuis Internet via l'IP publique de l'EC2) :
+
+```bash
+sudo socat TCP-LISTEN:31869,fork TCP:192.168.58.2:31869 &
+sudo socat TCP-LISTEN:30924,fork TCP:192.168.58.2:30924 &
+sudo socat TCP-LISTEN:30090,fork TCP:192.168.58.2:30090 &
+```
+
+#### 🎯 Pourquoi fait-on cela ?
+
+Minikube, lorsqu'il utilise le driver **Docker**, expose ses services sur un réseau interne Docker (généralement sur l'IP privée `192.168.58.2`).
+Même si les ports NodePort sont ouverts dans Kubernetes et dans le pare-feu AWS, ils **ne sont pas accessibles directement depuis l’extérieur** car Minikube ne les publie pas sur l'interface réseau principale de l'EC2.
+
+#### 🛠️ Solution : Port Forwarding avec Socat
+
+* **socat** écoute sur le port externe de l'EC2 (ex. 30853 pour Grafana).
+* Dès qu’une connexion arrive, il la redirige vers l'IP interne de Minikube (`192.168.58.2`) et le port correspondant.
+* Cela agit comme un "pont" ou proxy TCP entre l'extérieur et Minikube.
+
+#### 🔗 Dans ce cas :
+
+| Port EC2 | Service    | Port Minikube | Utilisation     |
+| -------- | ---------- | ------------- | --------------- |
+| 30853    | Grafana    | 30853         | Monitoring      |
+| 30090    | Prometheus | 30090         | Metrics         |
+| 31129    | Flask App  | 31129         | Application Web |
+
+#### ✅ Avantage :
+
+* Simple, efficace, immédiat.
+* Permet d’accéder aux dashboards et à l’app Flask depuis l’extérieur sans modifier la configuration Minikube.
+
+#### ⚠️ Attention :
+
+* Cette redirection est temporaire (si la machine redémarre, il faut relancer les commandes).
+* Pour une solution permanente, il est recommandé d’utiliser un service `systemd` ou une autre solution d'automatisation.
 
