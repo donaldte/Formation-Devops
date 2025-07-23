@@ -4,7 +4,6 @@ app = Flask(__name__)
 
 with open("/config/FLASK_PORT") as f:
     PORT = int(f.read().strip())
-
 @app.route("/")
 def hello():
     return f"Hello from Flask (read from file) on port {PORT}"
