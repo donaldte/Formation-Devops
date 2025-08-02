@@ -171,6 +171,11 @@ helm upgrade --install monitoring prometheus-community/kube-prometheus-stack \
   --set prometheus.service.type=NodePort
 ```
 
+### obtenir le mot de passe de l'utilisateur admin
+```bash
+kubectl --namespace default get secrets monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 -d ; echo
+```
+
 ### Obtenir les URLs :
 
 ```bash
