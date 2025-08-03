@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: alerte-crash
+  labels:
+    release: monitoring-kube-prometheus
+spec:
+  groups:
+    - name: crash-rules
+      rules:
+        - alert: CrashApp
+          expr: increase(kube_pod_container_status_restarts_total[5m]) > 2
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Problème dans l’app !"
+            description: "L’app a planté plus de 2 fois en 5 minutes."

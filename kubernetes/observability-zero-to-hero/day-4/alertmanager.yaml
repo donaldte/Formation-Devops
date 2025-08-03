@@ -1,13 +1,11 @@
 global:
   smtp_smarthost: 'smtp.gmail.com:587'
-  smtp_from: 'tonmail@gmail.com'
-  smtp_auth_username: 'tonmail@gmail.com'
-  smtp_auth_password: '{{ .smtp_pass }}'  # injecté par le Secret
+  smtp_from: 'tonemail@gmail.com'
+  smtp_auth_username: 'tonemail@gmail.com'
+  smtp_auth_password: '{{ .smtp_pass }}'
   smtp_require_tls: true
-
 route:
   receiver: email-notifications
-
 receivers:
   - name: email-notifications
     email_configs:

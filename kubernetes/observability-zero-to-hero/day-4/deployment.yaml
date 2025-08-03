@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ma-super-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: super-app
+  template:
+    metadata:
+      labels:
+        app: super-app
+    spec:
+      containers:
+        - name: super-app
+          image: ma-super-app:v1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
