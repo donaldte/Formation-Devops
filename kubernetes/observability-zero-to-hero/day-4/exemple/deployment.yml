@@ -15,6 +15,7 @@ spec:
       containers:
       - name: flask
         image: flask-metrics:v1
+        imagePullPolicy: Never
         ports:
         - containerPort: 5000
         livenessProbe:
