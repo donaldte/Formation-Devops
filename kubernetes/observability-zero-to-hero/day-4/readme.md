@@ -317,13 +317,17 @@ apiVersion: v1
 kind: Service
 metadata:
   name: flask
+  labels:
+    app: flask   # important : ce label est utilisé par le ServiceMonitor
 spec:
   selector:
     app: flask
   ports:
-    - port: 80
+    - name: metrics        # 👈 OBLIGATOIRE pour ServiceMonitor
+      port: 80
       targetPort: 5000
   type: ClusterIP
+
 ```
 
 ### 🚀 Applique-les :
@@ -353,9 +357,10 @@ spec:
     matchLabels:
       app: flask
   endpoints:
-    - port: 5000
+    - port: "metrics"      # 👈 correspond au nom défini dans le service
       path: /metrics
       interval: 15s
+
 ```
 
 ### 💡 Applique le fichier :

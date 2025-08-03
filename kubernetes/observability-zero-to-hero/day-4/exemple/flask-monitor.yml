@@ -9,6 +9,6 @@ spec:
     matchLabels:
       app: flask
   endpoints:
-    - port: 5000
+    - port: "metrics"      # 👈 correspond au nom défini dans le service
       path: /metrics
       interval: 15s
