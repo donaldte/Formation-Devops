@@ -13,12 +13,20 @@ spec:
         app: flask
     spec:
       containers:
-      - name: flask
-        image: flask-metrics:v1
-        imagePullPolicy: Never
-        ports:
-        - containerPort: 5000
-        livenessProbe:
-          httpGet:
-            path: /metrics
-            port: 5000
+        - name: flask
+          image: flask-metrics:v1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
