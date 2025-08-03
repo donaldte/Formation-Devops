@@ -1,6 +1,11 @@
 FROM python:3.10-slim
+
 WORKDIR /app
+
 COPY . .
-RUN pip install flask prometheus_client
+
+RUN pip install --no-cache-dir flask prometheus_client
+
 EXPOSE 5000
+
 CMD ["python", "app.py"]
