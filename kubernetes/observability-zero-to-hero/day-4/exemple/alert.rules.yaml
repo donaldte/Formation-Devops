@@ -1,0 +1,10 @@
+groups:
+- name: pod-restarts
+  rules:
+  - alert: PodCrashLoop
+    expr: increase(kube_pod_container_status_restarts_total[5m]) > 2
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Crash détecté sur le pod"
