@@ -68,3 +68,7 @@ def crash():
     Utilisé pour tester les alertes avec Alertmanager
     """
     os._exit(1)  # Ferme brutalement le processus (simule un plantage)
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
