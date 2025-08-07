@@ -12,14 +12,15 @@ spec:
       labels:
         name: fluent-bit
     spec:
+      serviceAccountName: fluent-bit  # 🔐 Important pour autoriser l’accès aux métadonnées K8s
       containers:
-      - name: fluent-bit
-        image: fluent/fluent-bit:1.9
-        volumeMounts:
-          - name: varlog
-            mountPath: /var/log
-          - name: config
-            mountPath: /fluent-bit/etc/
+        - name: fluent-bit
+          image: fluent/fluent-bit:1.9
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+            - name: config
+              mountPath: /fluent-bit/etc/
       volumes:
         - name: varlog
           hostPath:

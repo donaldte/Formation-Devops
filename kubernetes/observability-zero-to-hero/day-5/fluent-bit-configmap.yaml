@@ -17,7 +17,7 @@ data:
         Parser            docker
         Tag               kube.*
         Refresh_Interval  5
-        Skip_Long_Lines  On
+        Skip_Long_Lines   On
 
     [FILTER]
         Name                kubernetes
@@ -29,12 +29,21 @@ data:
         K8S-Logging.Exclude On
 
     [OUTPUT]
-        Name  es
-        Match *
-        Host  elasticsearch.observability.svc.cluster.local
-        Port  9200
-        HTTP_User  elastic
-        HTTP_Passwd  MyStrongPassword123
-        Index  fluent-bit
-        Type  _doc
+        Name            es
+        Match           *
+        Host            elasticsearch.observability.svc.cluster.local
+        Port            9200
+        HTTP_User       elastic
+        HTTP_Passwd     MyStrongPassword123
+        Index           fluent-bit
+        Type            _doc
         Logstash_Format On
+
+  parsers.conf: |
+    [PARSER]
+        Name         docker
+        Format       json
+        Time_Key     time
+        Time_Format  %Y-%m-%dT%H:%M:%S.%L
+        Time_Keep    On
+        Decode_Field_As escaped_utf8 log
