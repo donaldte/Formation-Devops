@@ -25,7 +25,16 @@ spec:
         - name: xpack.security.enabled
           value: "true"
         - name: ELASTIC_PASSWORD
-          value: "MyStrongPassword123"  # 🔐 Mot de passe de l'utilisateur "elastic"
+          value: "MyStrongPassword123"
+        - name: ES_JAVA_OPTS                # 🧠 Ajout clé ici
+          value: "-Xms512m -Xmx512m"
+        resources:                          # ✅ Limitation explicite des ressources
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
 ---
 apiVersion: v1
 kind: Service
