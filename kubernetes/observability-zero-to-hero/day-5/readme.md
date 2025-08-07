@@ -1,131 +1,311 @@
-# 🔍 Logging overview
-- Logging is crucial in any distributed system, especially in Kubernetes, to monitor application behavior, detect issues, and ensure the smooth functioning of microservices.
 
 
-## 🚀 Importance:
-- **Debugging**: Logs provide critical information when debugging issues in applications.
-- **Auditing**: Logs serve as an audit trail, showing what actions were taken and by whom.
-- **Performance** Monitoring: Analyzing logs can help identify performance bottlenecks.
-- **Security**: Logs help in detecting unauthorized access or malicious activities.
+# 🚀 Guide Complet : EFK + Jaeger sur Minikube avec sécurité Elasticsearch
 
-## 🛠️ Tools Available for Logging in Kubernetes
-- 🗂️ EFK Stack (Elasticsearch, Fluentbit, Kibana)
-- 🗂️ EFK Stack (Elasticsearch, FluentD, Kibana)
-- 🗂️ ELK Stack (Elasticsearch, Logstash, Kibana)
-- 📊 Promtail + Loki + Grafana
+---
 
-## 📦 EFK Stack (Elasticsearch, Fluentbit, Kibana)
-- EFK is a popular logging stack used to collect, store, and analyze logs in Kubernetes.
-- **Elasticsearch**: Stores and indexes log data for easy retrieval.
-- **Fluentbit**: A lightweight log forwarder that collects logs from different sources and sends them to Elasticsearch.
-- **Kibana**: A visualization tool that allows users to explore and analyze logs stored in Elasticsearch.
+## 🧰 PRÉREQUIS
 
-# 🏠 Architecture
-![Project Architecture](images/architecture.gif)
+✔️ Une instance EC2 (Ubuntu recommandé)
+✔️ Minikube installé et en cours d’exécution (`minikube start`)
+✔️ `kubectl` opérationnel
+✔️ `socat` (facultatif)
+✔️ Ports suivants ouverts dans les règles de sécurité EC2 :
 
+* 5601 (Kibana)
+* 9200 (Elasticsearch via socat ou port-forward)
+* 16686 (Jaeger UI)
 
-## 📝 Step-by-Step Setup
+---
 
-### 1) Create IAM Role for Service Account
-```bash
-eksctl create iamserviceaccount \
-    --name ebs-csi-controller-sa \
-    --namespace kube-system \
-    --cluster observability \
-    --role-name AmazonEKS_EBS_CSI_DriverRole \
-    --role-only \
-    --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy \
-    --approve
-```
-- This command creates an IAM role for the EBS CSI controller.
-- IAM role allows EBS CSI controller to interact with AWS resources, specifically for managing EBS volumes in the Kubernetes cluster.
-- We will attach the Role with service account
-
-### 2) Retrieve IAM Role ARN
-```bash
-ARN=$(aws iam get-role --role-name AmazonEKS_EBS_CSI_DriverRole --query 'Role.Arn' --output text)
-```
-- Command retrieves the ARN of the IAM role created for the EBS CSI controller service account.
-
-### 3) Deploy EBS CSI Driver
-```bash
-eksctl create addon --cluster observability --name aws-ebs-csi-driver --version latest \
-    --service-account-role-arn $ARN --force
-```
-- Above command deploys the AWS EBS CSI driver as an addon to your Kubernetes cluster.
-- It uses the previously created IAM service account role to allow the driver to manage EBS volumes securely.
-
-### 4) Create Namespace for Logging
-```bash
-kubectl create namespace logging
-```
-
-### 5) Install Elasticsearch on K8s
+# 📦 ÉTAPE 1 : Créer un Namespace dédié à l’observabilité
 
 ```bash
-helm repo add elastic https://helm.elastic.co
-
-helm install elasticsearch \
- --set replicas=1 \
- --set volumeClaimTemplate.storageClassName=gp2 \
- --set persistence.labels.enabled=true elastic/elasticsearch -n logging
+kubectl create namespace observability
 ```
-- Installs Elasticsearch in the `logging` namespace.
-- It sets the number of replicas, specifies the storage class, and enables persistence labels to ensure
-data is stored on persistent volumes.
 
-### 6) Retrieve Elasticsearch Username & Password
+> 🧠 On isole tous les composants (Elasticsearch, Fluent Bit, Kibana, Jaeger) dans un namespace pour mieux organiser notre cluster.
+
+---
+
+# 🛢️ ÉTAPE 2 : Déployer Elasticsearch avec mot de passe activé
+
+📄 Crée un fichier `elasticsearch.yaml` :
+
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch
+  namespace: observability
+spec:
+  serviceName: "elasticsearch"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - name: elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+        ports:
+        - containerPort: 9200
+        env:
+        - name: discovery.type
+          value: single-node
+        - name: xpack.security.enabled
+          value: "true"
+        - name: ELASTIC_PASSWORD
+          value: "MyStrongPassword123"  # 🔐 Mot de passe de l'utilisateur "elastic"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  namespace: observability
+spec:
+  ports:
+  - port: 9200
+    name: http
+  selector:
+    app: elasticsearch
+```
+
+🛠️ Applique le manifest :
+
 ```bash
-# for username
-kubectl get secrets --namespace=logging elasticsearch-master-credentials -ojsonpath='{.data.username}' | base64 -d
-# for password
-kubectl get secrets --namespace=logging elasticsearch-master-credentials -ojsonpath='{.data.password}' | base64 -d
+kubectl apply -f elasticsearch.yaml
 ```
-- Retrieves the password for the Elasticsearch cluster's master credentials from the Kubernetes secret.
-- The password is base64 encoded, so it needs to be decoded before use.
-- 👉 **Note**: Please write down the password for future reference
 
-### 7) Install Kibana
+---
+
+# 🖥️ ÉTAPE 3 : Déployer Kibana et le connecter à Elasticsearch sécurisé
+
+📄 Crée un fichier `kibana.yaml` :
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: observability
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:7.17.0
+        ports:
+        - containerPort: 5601
+        env:
+        - name: ELASTICSEARCH_HOSTS
+          value: "http://elastic:MyStrongPassword123@elasticsearch.observability.svc.cluster.local:9200"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  namespace: observability
+spec:
+  ports:
+  - port: 5601
+    name: http
+  selector:
+    app: kibana
+```
+
+🛠️ Applique :
+
 ```bash
-helm install kibana --set service.type=LoadBalancer elastic/kibana -n logging
+kubectl apply -f kibana.yaml
 ```
-- Kibana provides a user-friendly interface for exploring and visualizing data stored in Elasticsearch.
-- It is exposed as a LoadBalancer service, making it accessible from outside the cluster.
 
-### 8) Install Fluentbit with Custom Values/Configurations
-- 👉 **Note**: Please update the `HTTP_Passwd` field in the `fluentbit-values.yml` file with the password retrieved earlier in step 6: (i.e NJyO47UqeYBsoaEU)"
+---
+
+# 🔍 ÉTAPE 4 : Déployer Fluent Bit avec authentification vers Elasticsearch
+
+📄 Crée le fichier `fluent-bit-configmap.yaml` :
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-config
+  namespace: observability
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush        1
+        Daemon       Off
+        Log_Level    info
+        Parsers_File parsers.conf
+
+    [INPUT]
+        Name              tail
+        Path              /var/log/containers/*.log
+        Parser            docker
+        Tag               kube.*
+        Refresh_Interval  5
+        Skip_Long_Lines  On
+
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Kube_URL            https://kubernetes.default.svc:443
+        Merge_Log           On
+        Keep_Log            Off
+        K8S-Logging.Parser  On
+        K8S-Logging.Exclude On
+
+    [OUTPUT]
+        Name  es
+        Match *
+        Host  elasticsearch.observability.svc.cluster.local
+        Port  9200
+        HTTP_User  elastic
+        HTTP_Passwd  MyStrongPassword123
+        Index  fluent-bit
+        Type  _doc
+        Logstash_Format On
+```
+
+📄 Crée maintenant le DaemonSet `fluent-bit-daemonset.yaml` :
+
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluent-bit
+  namespace: observability
+spec:
+  selector:
+    matchLabels:
+      name: fluent-bit
+  template:
+    metadata:
+      labels:
+        name: fluent-bit
+    spec:
+      containers:
+      - name: fluent-bit
+        image: fluent/fluent-bit:1.9
+        volumeMounts:
+          - name: varlog
+            mountPath: /var/log
+          - name: config
+            mountPath: /fluent-bit/etc/
+      volumes:
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: config
+          configMap:
+            name: fluent-bit-config
+```
+
+🛠️ Applique les deux manifests :
+
 ```bash
-helm repo add fluent https://fluent.github.io/helm-charts
-helm install fluent-bit fluent/fluent-bit -f fluentbit-values.yaml -n logging
+kubectl apply -f fluent-bit-configmap.yaml
+kubectl apply -f fluent-bit-daemonset.yaml
 ```
 
-## ✅ Conclusion
-- We have successfully installed the EFK stack in our Kubernetes cluster, which includes Elasticsearch for storing logs, Fluentbit for collecting and forwarding logs, and Kibana for visualizing logs.
-- To verify the setup, access the Kibana dashboard by entering the `LoadBalancer DNS name followed by :5601 in your browser.
-    - `http://LOAD_BALANCER_DNS_NAME:5601`
-- Use the username and password retrieved in step 6 to log in.
-- Once logged in, create a new data view in Kibana and explore the logs collected from your Kubernetes cluster.
+---
 
+# 🔭 ÉTAPE 5 : Déployer Jaeger pour les traces distribuées
 
-
-## 🧼 Clean Up
 ```bash
+kubectl create -f https://github.com/jaegertracing/jaeger-operator/releases/download/v1.46.0/jaeger-operator.yaml -n observability
+```
 
-helm uninstall monitoring -n monitoring
+📄 Crée ensuite le fichier `jaeger.yaml` :
 
-helm uninstall fluent-bit -n logging
+```yaml
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: simplest
+  namespace: observability
+```
 
-helm uninstall elasticsearch -n logging
+```bash
+kubectl apply -f jaeger.yaml
+```
 
-helm uninstall kibana -n logging
+---
 
-cd day-4
+# 🌐 ÉTAPE 6 : Accéder aux Interfaces Web (URL des services)
 
-kubectl delete -k kubernetes-manifest/
+Voici les commandes pour accéder à chaque service en local ou connaître leur IP/port si tu exposes via NodePort.
 
-kubectl delete -k alerts-alertmanager-servicemonitor-manifest/
+---
 
+### 🔗 Voir les services déployés :
 
-eksctl delete cluster --name observability
+```bash
+kubectl get svc -n observability
+```
+
+🔁 Tu verras une sortie comme :
 
 ```
+NAME             TYPE        CLUSTER-IP       PORT(S)          AGE
+elasticsearch    ClusterIP   10.96.0.1        9200/TCP         5m
+kibana           ClusterIP   10.96.0.2        5601/TCP         5m
+simplest-query   ClusterIP   10.96.0.3        16686/TCP        3m
+```
+
+---
+
+### 🌐 Accès local (avec port-forward)
+
+#### Kibana :
+
+```bash
+kubectl port-forward svc/kibana 5601:5601 -n observability
+```
+
+> Ouvre [http://localhost:5601](http://localhost:5601)
+> Identifiants : `elastic / MyStrongPassword123`
+
+#### Elasticsearch :
+
+```bash
+kubectl port-forward svc/elasticsearch 9200:9200 -n observability
+```
+
+> Test :
+
+```bash
+curl -u elastic:MyStrongPassword123 http://localhost:9200
+```
+
+#### Jaeger UI :
+
+```bash
+kubectl port-forward svc/simplest-query 16686:16686 -n observability
+```
+
+> Ouvre [http://localhost:16686](http://localhost:16686)
+
+---
+
+# ✅ RÉSULTAT ATTENDU
+
+| Composant         | Accès via port-forward                           | Description                                    |
+| ----------------- | ------------------------------------------------ | ---------------------------------------------- |
+| **Elasticsearch** | [http://localhost:9200](http://localhost:9200)   | Base de données des logs (mot de passe requis) |
+| **Kibana**        | [http://localhost:5601](http://localhost:5601)   | Interface Web pour visualiser les logs         |
+| **Jaeger UI**     | [http://localhost:16686](http://localhost:16686) | Suivi des requêtes distribuées (spans, traces) |
+
