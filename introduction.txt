@@ -1,0 +1,15 @@
+Paas: Platform as a Service
+sdlc: software development lifecycle 
+  Rg ---> analyse ----> design ----> code ----> test ----> deploy
+  model: prototype, waterfall, agile, dev ops 
+
+  dev ops: (collaboration, communication, monitoring, Ci/cd, IAC, automatisation)
+  dev sec ops
+  collaboration: git et github, gitlab, bitbucket, confluence, jira, trello
+  ci/cd: continuous integration, continuous delivery, continuous deployment
+  pipeline (dev, test, prod)
+
+  IAC: infrastructure as code (terraform, ansible, puppet, chef, salt, cloudformation)
+
+
+dev ---> build ---test > staging -- > prod 
