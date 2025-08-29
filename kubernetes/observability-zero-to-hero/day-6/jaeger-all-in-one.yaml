@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observability
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jaeger
+  namespace: observability
+  labels: {app: jaeger}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: jaeger}
+  template:
+    metadata:
+      labels: {app: jaeger}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "14269"
+    spec:
+      containers:
+        - name: all-in-one
+          image: jaegertracing/all-in-one:1.57
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--memory.max-traces=50000"
+          ports:
+            # UI
+            - containerPort: 16686 # / (UI)
+            # Collector (OTLP gRPC/HTTP) + autres ports collector standards
+            - containerPort: 4317  # OTLP gRPC
+            - containerPort: 4318  # OTLP HTTP
+            - containerPort: 14268 # Jaeger Thrift HTTP
+            - containerPort: 14250 # Jaeger gRPC
+            - containerPort: 9411  # Zipkin
+            # Metrics
+            - containerPort: 14269 # /metrics
+          readinessProbe:
+            httpGet: { path: "/", port: 16686 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: "/", port: 16686 }
+            initialDelaySeconds: 10
+            periodSeconds: 20
+---
+# Service pour le Collector (endpoint OTLP pour tes apps)
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger-collector
+  namespace: observability
+  labels: {app: jaeger}
+spec:
+  selector: {app: jaeger}
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+    - name: jaeger-grpc
+      port: 14250
+      targetPort: 14250
+    - name: jaeger-http
+      port: 14268
+      targetPort: 14268
+    - name: zipkin
+      port: 9411
+      targetPort: 9411
+  type: ClusterIP
+---
+# Service pour l’UI (Query)
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger-query
+  namespace: observability
+  labels: {app: jaeger}
+spec:
+  selector: {app: jaeger}
+  ports:
+    - name: http
+      port: 16686
+      targetPort: 16686
+  type: ClusterIP
