@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ma-super-app
+  labels:
+    app: super-app
 spec:
   replicas: 1
   selector:
@@ -11,10 +13,47 @@ spec:
     metadata:
       labels:
         app: super-app
+      annotations:
+        # Scrape Prometheus (pour /metrics)
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "5000"
     spec:
       containers:
         - name: super-app
           image: ma-super-app:v1
-          imagePullPolicy: Never
+          imagePullPolicy: Never   # garde si tu build l'image dans Minikube
           ports:
             - containerPort: 5000
+          env:
+            # ===== OpenTelemetry → Jaeger (OTLP/HTTP) =====
+            - name: OTEL_SERVICE_NAME
+              value: "flask-demo"  # renomme si tu veux
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "http/protobuf"
+            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+              value: "http://jaeger-collector.observability.svc.cluster.local:4318/v1/traces"
+            # (optionnel) échantillonnage 100% en dev
+            - name: OTEL_TRACES_SAMPLER
+              value: "always_on"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"

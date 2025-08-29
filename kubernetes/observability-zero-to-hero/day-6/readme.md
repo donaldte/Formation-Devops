@@ -1,104 +1,97 @@
-## 🕵️‍♂️ What is Jaeger?
-- Jaeger is an open-source, end-to-end distributed tracing system used for monitoring and troubleshooting microservices-based architectures. It helps developers understand how requests flow through a complex system, by tracing the path a request takes and measuring how long each step in that path takes.
+# 🕵️‍♂️ Qu’est-ce que Jaeger ?
 
-## ❓ Why Use Jaeger?
-- In modern applications, especially microservices architectures, a single user request can touch multiple services. When something goes wrong, it’s challenging to pinpoint the source of the problem. Jaeger helps by:
+Jaeger est un système open source de traçage distribué de bout en bout, utilisé pour la supervision et le débogage d’architectures basées sur les microservices.
+Il aide les développeurs à comprendre comment les requêtes circulent dans un système complexe, en retraçant le chemin suivi et en mesurant la durée de chaque étape.
 
-- 🐢 **Identifying bottlenecks**: See where your application spends most of its time.
-- 🔍 **Finding root causes of errors**: Trace errors back to their source.
-- ⚡ **Optimizing performance**: Understand and improve the latency of services.
+---
 
+## ❓ Pourquoi utiliser Jaeger ?
 
-## 📚 Core Concepts of Jaeger
+Dans les applications modernes (surtout en microservices), une seule requête utilisateur peut passer par plusieurs services. Quand un problème survient, il est difficile d’identifier la source. Jaeger aide à :
 
-- 🛤️ **Trace**: A trace represents the journey of a request as it travels through various services. Think of it as a detailed map that shows every stop a request makes in your system.
-- 📏 **Span**: Each trace is made up of multiple spans. A span is a single operation within a trace, such as an API call or a database query. It has a start time and a duration.
-- 🏷️ **Tags**: Tags are key-value pairs that provide additional context about a span. For example, a tag might indicate the HTTP method used (GET, POST) or the status code returned.
-- 📝 **Logs**: Logs in a span provide details about what’s happening during that operation. They can capture events like errors or important checkpoints.
-- 🔗 **Context Propagation**: For Jaeger to trace requests across services, it needs to propagate context. This means each service in the call chain passes along the trace information to the next service.
+* 🐢 **Identifier les goulots d’étranglement** : voir où l’application consomme le plus de temps.
+* 🔍 **Trouver la cause des erreurs** : remonter à la source des problèmes.
+* ⚡ **Optimiser les performances** : comprendre et réduire la latence des services.
 
-# 🏠 Architecture
+---
+
+## 📚 Concepts de base
+
+* 🛤️ **Trace** : représente le parcours complet d’une requête entre plusieurs services.
+* 📏 **Span** : une opération unique dans une trace (exemple : appel API, requête SQL). Elle a un temps de début et une durée.
+* 🏷️ **Tags** : paires clé-valeur ajoutant du contexte (ex. méthode HTTP, code retour).
+* 📝 **Logs** : informations détaillées sur ce qui s’est passé durant un span.
+* 🔗 **Propagation de contexte** : permet de transmettre les infos de trace entre services afin de garder la continuité.
+
+---
+
+# 🏠 Architecture Jaeger
+
+Jaeger se compose de plusieurs éléments :
+
+* **Agent** : collecte les traces des applications.
+* **Collector** : reçoit et traite les traces.
+* **Query** : fournit l’UI pour visualiser les traces.
+* **Stockage** : conserve les traces (par défaut en mémoire dans Minikube).
+
 ![Project Architecture](images/architecture.gif)
+---
 
+## ⚙️ Mise en place de Jaeger dans Minikube
 
+### Étape 1 : Instrumentation du code
 
-## ⚙️ Setting Up Jaeger
+On doit instrumenter nos services avec OpenTelemetry pour générer et envoyer des traces.
+👉 Dans ton cas, ton application Flask est déjà instrumentée avec OpenTelemetry (cf. code `app.py`).
 
-### Step 1: Instrumenting Your Code
-- To start tracing, you need to instrument your services. This means adding tracing capabilities to your code. Most popular programming languages and frameworks have libraries or middleware that make this easy.
-- We have already instrumented our code using OpenTelemetry libraries/packages. For more details, refer to `day-4/application/service-a/tracing.js` or `day-4/application/service-b/tracing.js`.
+---
 
+### Étape 2 : Créer le namespace d’observabilité
 
-### Step 2: Components of Jaeger
-- Jaeger consists of several components:
-- Agent: Collects traces from your application.
-- Collector: Receives traces from the agent and processes them.
-- Query: Provides a UI to view traces.
-- Storage: Stores traces for later retrieval (often a database like *Elasticsearch*).
-
-
-### Step 3: Export Elasticsearch CA Certificate
-- This command retrieves the CA certificate from the Elasticsearch master certificate secret and decodes it, saving it to a ca-cert.pem file.
 ```bash
-kubectl get secret elasticsearch-master-certs -n logging -o jsonpath='{.data.ca\.crt}' | base64 --decode > ca-cert.pem
+kubectl create ns observability
 ```
 
-### Step 4: Create Tracing Namespace
-- Creates a new Kubernetes namespace called tracing if it doesn't already exist, where Jaeger components will be installed.
-```bash
-kubectl create ns tracing
-```
+---
 
-### Step 5: Create ConfigMap for Jaeger's TLS Certificate
-- Creates a ConfigMap in the tracing namespace, containing the CA certificate to be used by Jaeger for TLS.
-```bash
-kubectl create configmap jaeger-tls --from-file=ca-cert.pem -n tracing
-```
-### Step 6: Create Secret for Elasticsearch TLS
-- Creates a Kubernetes Secret in the tracing namespace, containing the CA certificate for Elasticsearch TLS communication.
-```bash
-kubectl create secret generic es-tls-secret --from-file=ca-cert.pem -n tracing
-```
-### Step 7: Add Jaeger Helm Repository
-- adds the official Jaeger Helm chart repository to your Helm setup, making it available for installations.
+### Étape 3 : Ajouter le dépôt Helm de Jaeger
+
 ```bash
 helm repo add jaegertracing https://jaegertracing.github.io/helm-charts
-
 helm repo update
 ```
 
-### Step 8: Install Jaeger with Custom Values
-- 👉 **Note**: Please update the `password` field and other related field in the `jaeger-values.yaml` file with the password retrieved earlier in day-4 at step 6: (i.e NJyO47UqeYBsoaEU)"
--  Command installs Jaeger into the tracing namespace using a custom jaeger-values.yaml configuration file. Ensure the password is updated in the file before installation.
+---
+
+### Étape 4 : Installer Jaeger (all-in-one)
+
+👉 Ce mode déploie tous les composants Jaeger (collector, query, agent, stockage mémoire) dans un seul pod.
+
 ```bash
-helm install jaeger jaegertracing/jaeger -n tracing --values jaeger-values.yaml
-```
-### Step 9: Port Forward Jaeger Query Service
-- Command forwards port 8080 on your local machine to the Jaeger Query service, allowing you to access the Jaeger UI locally.
-```bash
-kubectl port-forward svc/jaeger-query 8080:80 -n tracing
-
-```
-
-## 🧼 Clean Up
-```bash
-
-helm uninstall jaeger -n tracing
-
-helm uninstall elasticsearch -n logging
-
-# Also delete PVC created for elasticsearch
-
-helm uninstall monitoring -n monitoring
-
-cd day-4
-
-kubectl delete -k kubernetes-manifest/
-
-kubectl delete -k alerts-alertmanager-servicemonitor-manifest/
-
-# Delete cluster
-eksctl delete cluster --name observability
-
+helm install jaeger jaegertracing/jaeger -n observability \
+  --set allInOne.enabled=true \
+  --set collector.service.type=ClusterIP \
+  --set query.service.type=NodePort
 ```
 
+---
+
+### Étape 5 : Port-forward pour accéder à l’UI Jaeger
+
+```bash
+kubectl -n observability port-forward svc/jaeger-query 16686:16686
+```
+
+Puis ouvre dans ton navigateur :
+👉 [http://localhost:16686](http://localhost:16686)
+
+---
+
+## 🧼 Nettoyage
+
+Si tu veux désinstaller :
+
+```bash
+helm uninstall jaeger -n observability
+kubectl delete ns observability
+```
