@@ -3,32 +3,21 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Evite les .pyc, force un flush stdout
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# (Optionnel mais utile) utilisateur non-root
+# 1) Installer les deps en root (plus simple/fiable)
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+# 2) Créer l’utilisateur non-root ensuite
 RUN adduser --disabled-password --gecos "" appuser
 USER appuser
 
-# Copie des sources en dernier pour optimiser le cache si tu passes à un requirements.txt
+# 3) Copier le code après (cache-friendly)
 COPY --chown=appuser:appuser . .
 
-# Déps runtime
-# - Flask + Prometheus
-# - OpenTelemetry SDK + Exporter OTLP + auto-instrumentations Flask/Requests
-RUN pip install --no-cache-dir \
-    flask==3.0.3 \
-    prometheus_client==0.20.0 \
-    opentelemetry-api==1.27.0 \
-    opentelemetry-sdk==1.27.0 \
-    opentelemetry-exporter-otlp==1.27.0 \
-    opentelemetry-instrumentation==0.48b0 \
-    opentelemetry-instrumentation-flask==0.48b0 \
-    opentelemetry-instrumentation-requests==0.48b0
-
-# ----- OpenTelemetry vers Jaeger (OTLP/HTTP) -----
-# Tu peux override ces variables dans le Deployment
+# 4) Env OTel (tu peux aussi les définir dans le Deployment)
 ENV OTEL_SERVICE_NAME=flask-demo \
     OTEL_TRACES_EXPORTER=otlp \
     OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
