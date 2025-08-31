@@ -1,0 +1,18 @@
+Cameroun ----> CD ---> senegal ---- > Gabon 
+
+2h  --- > avion 
+
+3h  ..> arriver 
+
+
+API paiment ___> api commande  __> lapi -----> validation -----> api paiement
+
+2s 
+
+Instrumentation du code avec OpenTelemetry(tracing)
+
+
+jaeger : agent , collector , query , stockage(elasticsearch(ebs), cassandra(pvc), memory)
+
+
+

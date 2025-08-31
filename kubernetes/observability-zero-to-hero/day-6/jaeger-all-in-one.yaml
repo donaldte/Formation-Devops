@@ -92,5 +92,5 @@ spec:
 
 
 # Jaeger UI: EC2:30090 -> Minikube:$MINIKUBE_IP:30090
-sudo socat TCP-LISTEN:30090,fork TCP:${MINIKUBE_IP}:30090 &
-sudo socat TCP-LISTEN:30853,fork TCP:${MINIKUBE_IP}:30853  
+# sudo socat TCP-LISTEN:30090,fork TCP:${MINIKUBE_IP}:30090 &
+# sudo socat TCP-LISTEN:30853,fork TCP:${MINIKUBE_IP}:30853  
