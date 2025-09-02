@@ -19,13 +19,13 @@ fi
 # URL de l'API GitHub
 API_URL="https://api.github.com/repos/$ORG_NAME/$REPO_NAME"
 
-# Fonction pour gérer les erreurs API
+# Fonction pour gérer les erreurs API 
 handle_api_error() {
     local http_code="$1"
     local response="$2"
     local message="$3"
 
-    if [ "$http_code" -ne 200 ] && [ "$http_code" -ne 201 ]; then
+    if [ "$http_code" -ne 200 ] && [ "$http_code" -ne 201 ]; then 
         echo "❌ Erreur : Impossible de $message."
         echo "Code HTTP : $http_code"
         echo "Réponse : $response"
@@ -58,6 +58,7 @@ read -p "📖 Entrez la description de l'issue : " ISSUE_BODY
 read -p "🏷️ Sélectionnez un label (optionnel, laissez vide si aucun) : " SELECTED_LABEL
 
 # Vérification si l'utilisateur a sélectionné un label valide
+# -n vérifie si la chaîne n'est pas vide
 if [[ -n "$SELECTED_LABEL" ]] && ! echo "$labels_list" | grep -Fxq "$SELECTED_LABEL"; then
     echo "⚠️ Le label sélectionné n'existe pas. Il sera ignoré."
     SELECTED_LABEL=""
