@@ -40,6 +40,7 @@ echo "🔍 Récupération des issues du dépôt..."
 # -u pour utiliser l'authentification HTTP Basic
 # -w pour afficher le code HTTP à la fin de la réponse
 
+
 issues_response=$(curl -s -u "$GITHUB_USERNAME:$GITHUB_TOKEN" -w "%{http_code}" "$API_URL")
 issues_http_code="${issues_response: -3}" # les 3 derniers caractères
 issues_json="${issues_response::-3}" # tout sauf les 3 derniers caractères

@@ -1,0 +1,5 @@
+Bash : Bourne Again SHell (interpréteur de commandes le plus courant sous Linux/Unix).
+which bash: 
+which sh :
+
+#!/bin/bash
