@@ -9,9 +9,9 @@ x-resource-limits: &default-resources
   deploy:
     resources:
       limits:
-        cpus: "0.50"
-        memory: 512M
-      reservations:
+        cpus: "0.50" # 50% d'un CPU
+        memory: 512M # max 512MB
+      reservations: 
         memory: 128M
 
 services:
@@ -19,7 +19,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: app1_backend
+    container_name: app1_backend # nom unique a retirer si tu vx scaler le service
     env_file: .env
     environment:
       <<: *default-env

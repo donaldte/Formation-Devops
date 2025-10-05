@@ -10,8 +10,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro # ro = read only
+      - ./frontend:/usr/share/nginx/html:ro # ro = read only
 
 
 # docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
