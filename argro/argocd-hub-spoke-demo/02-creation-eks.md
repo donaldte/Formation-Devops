@@ -33,6 +33,13 @@ kubectl config get-contexts
 
 ⚠️ Cette étape se fait sur **hub-cluster** (ton cluster principal).
 
+# switcher sur le cluster hub
+
+````bash
+kubectl config use-context hub-cluster 
+````
+
+
 ```bash
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
@@ -90,7 +97,7 @@ https://<api-spoke-2>           spoke-cluster-2   default    Successful
 ---
 
 ## 7. Déployer une application sur un cluster Spoke
- voir le dossier `d:/customers/tuto/Formation-Devops/argro/argocd-hub-spoke-demo/manifests/guest-book`
+ voir le dossier `Formation-Devops/argro/argocd-hub-spoke-demo/manifests/guest-book`
 ## 8. Suppression des clusters EKS
 
 Quand tu n’as plus besoin des clusters :
