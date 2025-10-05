@@ -3,7 +3,7 @@
 # =============================
 
 x-default-env: &default-env
-  - TZ=UTC
+  TZ: UTC
 
 x-resource-limits: &default-resources
   deploy:
@@ -19,7 +19,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: app1_backend # nom unique a retirer si tu vx scaler le service
+    container_name: app1_backend # nom unique à retirer si tu veux scaler le service
     env_file: .env
     environment:
       <<: *default-env
