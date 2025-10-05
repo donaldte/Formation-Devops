@@ -1,0 +1,19 @@
+# Stage 1: Build React app
+ARG MODE=production
+FROM node:20-slim AS builder
+WORKDIR /app
+
+# Install dependencies
+COPY package.json package-lock.json ./
+RUN if ["$MODE" = "production"]; then npm ci; else npm install; fi
+
+# Copy source and build
+COPY . .
+RUN npm run build
+
+# Stage 2: Distroless NGINX to serve static files
+FROM gcr.io/distroless/nginx:latest
+# NGINX in distroless expects files in /usr/share/nginx/html
+COPY --from=builder /app/build /usr/share/nginx/html
+
+# NGINX runs automatically (no CMD needed)

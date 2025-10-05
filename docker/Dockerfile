@@ -8,4 +8,6 @@ WORKDIR /app
 COPY hello.py .
 
 # Run the script when the container starts
-CMD ["python", "hello.py"]
+ENTRYPOINT ["/app/entrypoint.sh"]
+
+# hello:latest

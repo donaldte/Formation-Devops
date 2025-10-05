@@ -1,0 +1,33 @@
+# Multi-stage Python Dockerfile
+# Stage 1: Builder
+FROM python:3.11-slim AS builder
+WORKDIR /app
+
+# Create requirements.txt
+RUN echo "requests==2.31.0" > requirements.txt
+
+# Install dependencies
+RUN pip install --user --no-cache-dir -r requirements.txt
+
+# Copy application
+COPY hello.py .
+
+# Stage 2: Runtime with Distroless Python
+# CORRECTED: Use available Distroless Python version
+FROM python:3.11-slim
+WORKDIR /app
+
+# Copy Python packages and application
+COPY --from=builder /root/.local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /app/hello.py .
+
+CMD ["hello.py"]
+
+# 100 GB / 10GB -> 1GB \ 500 MB
+
+# 4 GB / 1 GB + 1 GB -> 1 GB(25 %) \ 500 MB (50 %)
+                #-> 50 MB
+
+               # 50 MB / 4000 MB -> swap area(1 GB)
+
+# 50/3000 -   500 MB/2000 MB
