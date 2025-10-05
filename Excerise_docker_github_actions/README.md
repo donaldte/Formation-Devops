@@ -1,21 +1,32 @@
-# Docker example
 
-## This is an example template for how to dockerize your multi-container, full-stack Node.js application. 
+## 🚀 DevOps Assignment: Fullstack Deployment with Docker Compose
 
-This example inclues Postgres, Redis, pgAdmin4, and a separate frontend and backend on different ports. The application itself doesn't do much, but it will connect to a postgres database via typeorm as well as a redis database. To run this application, please make sure you have docker installed on your machine. CD into the root directory of the project and type 
+### 🎯 Objectif
 
-> docker-compose up --build
+L’objectif de cet exercice est de **déployer une application complète (frontend + backend + base de données + cache)** en utilisant **Docker Compose** et un pipeline **GitHub Actions** pour l’automatisation du déploiement sur un serveur distant (EC2 ou VPS).
 
-This will build all the images and then compose the multi-container app. 
+Le projet fourni contient un **backend Node.js** connecté à une base de données et un cache Redis. Vous allez mettre en place toute l’infrastructure Docker, sans modifier la logique applicative.
 
-You can then access the frontend at 
+---
 
-> http://localhost:3000 
+👉 **Votre mission** est de créer l’environnement Docker et l’automatiser.
 
-and the backend at 
+> 🔹 N’oubliez pas d’utiliser des **volumes**, **réseaux internes**, et des **variables d’environnement** depuis un fichier `.env`.
 
-> http://localhost:4000
 
-This is a barebones example designed to help you get your app up and running. While the docker-compose.yml lacks some options that may be required for more complex needs, it will be sufficient for connecting to a postgres database, using cookie-based authentication via redis, and addressing any cors issues which may arise from having a backend and frontend on different ports.
+### 🕓 Date limite
 
-Please let me know if you have any questions or if I can help you!
+📅 **Mardi lors de la porchain session**
+Tout rendu après cette date sera considéré en retard.
+
+---
+
+### 🔗 Ressources utiles
+
+* 🐳 [Docker Compose Documentation](https://docs.docker.com/compose/)
+* 🧱 [Dockerfile Reference](https://docs.docker.com/engine/reference/builder/)
+* ☁️ [AWS EC2 Guide](https://docs.aws.amazon.com/ec2/)
+* ⚙️ [GitHub Actions Documentation](https://docs.github.com/en/actions)
+* 🔐 [Secrets GitHub Actions](https://docs.github.com/en/actions/security-guides/encrypted-secrets)
+* 📦 [Docker Ignore File](https://docs.docker.com/build/ignore/)
+
