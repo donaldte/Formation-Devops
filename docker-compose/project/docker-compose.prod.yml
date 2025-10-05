@@ -1,0 +1,17 @@
+# =============================
+# 🚀 Docker Compose - Prod
+# =============================
+
+services:
+  backend:
+    command: gunicorn app.main:app --bind 0.0.0.0:8000 --workers 3
+
+  nginx:
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./frontend:/usr/share/nginx/html:ro
+
+
+# docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build

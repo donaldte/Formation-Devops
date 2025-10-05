@@ -1,0 +1,18 @@
+# =============================
+# 🧩 Docker Compose - Dev
+# =============================
+
+services:
+  backend:
+    ports:
+      - "8000:8000"  # accessible directement
+    volumes:
+      - ./backend:/app  # montage du code pour le hot reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  nginx:
+    ports:
+      - "8080:80"  # accessible sur localhost:8080
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./frontend:/usr/share/nginx/html:ro

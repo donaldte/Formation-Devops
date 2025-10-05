@@ -1,0 +1,45 @@
+# =============================
+# 📦 Docker Compose V2 - Base
+# =============================
+
+x-default-env: &default-env
+  - TZ=UTC
+
+x-resource-limits: &default-resources
+  deploy:
+    resources:
+      limits:
+        cpus: "0.50"
+        memory: 512M
+      reservations:
+        memory: 128M
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: app1_backend
+    env_file: .env
+    environment:
+      <<: *default-env
+    expose:
+      - "8000"  # interne seulement
+    networks:
+      - app1_net
+    restart: unless-stopped
+    <<: *default-resources
+
+  nginx:
+    image: nginx:alpine
+    container_name: app1_nginx
+    depends_on:
+      - backend
+    networks:
+      - app1_net
+    restart: unless-stopped
+    <<: *default-resources
+
+networks:
+  app1_net:
+    name: app1_net
