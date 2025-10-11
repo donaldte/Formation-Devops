@@ -18,6 +18,8 @@ jobs:
       - run: echo "🍏 This job's status is ${{ job.status }}."
   
   build:
+    # deend du job Explore-GitHub-Actions
+    needs: Explore-GitHub-Actions
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
