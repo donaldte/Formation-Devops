@@ -14,4 +14,4 @@ services:
       - ./frontend:/usr/share/nginx/html:ro  # lecture seule
 
 
-# docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build

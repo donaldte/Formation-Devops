@@ -22,7 +22,7 @@ services:
   # Application Web
   # ----------------------
   web:
-    container_name: web_app   # Nom du conteneur (optionnel)
+    container_name: web_app   # Nom du conteneur (optionnel) --scale web=3 pour dupliquer
     build:
       context: .              # Construit l'image depuis le Dockerfile à la racine
       dockerfile: Dockerfile  # Précise le Dockerfile (optionnel si nom par défaut)

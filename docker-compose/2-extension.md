@@ -1,156 +1,303 @@
-# Mini-cours : **Extensions `x-`** dans Docker Compose
-
-Les **extensions** sont des blocs YAML dont la clé commence par **`x-`** (ex. `x-logging`, `x-service-base`). Elles servent à **modulariser** et **réutiliser** de la configuration.
-Compose **ignore** ces clés `x-` (c’est l’unique cas où des champs inconnus sont ignorés), mais tu peux **référencer leur contenu** via **ancres & alias**.
+# 🎓 **Cours complet sur les extensions de fichiers dans Docker Compose (multi-fichiers)**
 
 ---
 
-## Règles rapides
+## 🚀 1️⃣ Qu’est-ce qu’une extension de fichier Compose ?
 
-* **Déclaration** : au **niveau racine** du fichier (top-level) avec un préfixe `x-`.
-* **Contenu** : n’importe quel YAML (maps, listes, scalaires).
-* **Utilisation** : combine avec **ancres (`&`)** et **alias (`*`)** pour injecter le contenu dans tes services (souvent avec la **fusion de map** `<<:`).
-* **Multi-fichiers** : les **ancres ne traversent pas** les fichiers `-f`. Si tu as plusieurs compose, **redéclare** tes ancres/`x-` dans chaque fichier où tu en as besoin.
-* **Validation** : `docker compose config` montre le rendu final (les `x-` n’y figurent pas, mais leurs **valeurs injectées** oui).
+Docker Compose te permet de **diviser ta configuration** en plusieurs fichiers :
 
----
+* un **fichier de base** (`docker-compose.yml`)
+* un ou plusieurs **fichiers d’extension** (`docker-compose.dev.yml`, `docker-compose.prod.yml`, etc.)
 
-## Exemple minimal
+👉 Ces fichiers peuvent **s’étendre**, **s’écraser** ou **ajouter** des paramètres.
 
-```yaml
-# ----- Extensions réutilisables (ignorées par Compose) -----
-x-logging: &logging
-  driver: json-file
-  options: { max-size: "10m", max-file: "3" }
+Cela permet d’avoir :
 
-x-healthcheck-http: &hc_http
-  test: ["CMD-SHELL", "curl -fsS http://localhost:8000/healthz || exit 1"]
-  interval: 10s
-  timeout: 3s
-  retries: 5
-  start_period: 15s
-
-x-service-base: &svc_base
-  restart: unless-stopped
-  logging: *logging
-  environment:
-    TZ: "UTC"
-    LANG: "C.UTF-8"
-  networks: [app_net]
-
-# ----- Définition réseau -----
-networks:
-  app_net: {}
-
-# ----- Services qui réutilisent les fragments -----
-services:
-  web:
-    <<: *svc_base                 # hérite du bloc commun
-    image: myorg/web:1.2.3
-    healthcheck: *hc_http
-    ports: ["80:8000"]
-
-  worker:
-    <<: *svc_base
-    image: myorg/worker:1.2.3
-    command: python worker.py
-    environment:
-      WORKER_CONCURRENCY: "4"
-
-  db:
-    image: postgres:15.6
-    <<: *svc_base                 # on peut aussi réutiliser en partie
-    environment:
-      POSTGRES_DB: app
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: secret
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-volumes:
-  pgdata: {}
-```
-
-**Ce que ça t’apporte :**
-
-* Une **seule source de vérité** pour les logs, variables communes, réseaux, etc.
-* Des services plus **courts**, **cohérents**, et **faciles à maintenir**.
-* Tu changes, par ex., la rotation de logs **à un seul endroit** (`x-logging`).
+* un seul fichier de base commun à tout le monde,
+* et plusieurs variantes selon l’environnement (développement, production, staging…).
 
 ---
 
-## Variante : listes réutilisées
+## ⚙️ 2️⃣ Principe
 
-```yaml
-x-common-ports: &ports_http ["80:8000"]
-x-common-vols:  &code_vols  ["./data:/data:rw"]
+Imagine que tu as :
 
-services:
-  web:
-    image: my/web
-    ports:  *ports_http
-    volumes: *code_vols
-
-  admin:
-    image: my/admin
-    ports:  *ports_http
+```
+docker-compose.yml        # base commune
+docker-compose.dev.yml    # version développement
+docker-compose.prod.yml   # version production
 ```
 
-> ⚠️ Les **listes ne se fusionnent pas** : si tu dois “ajouter” un port, redéclare la liste ou crée une **seconde extension** (ex. `x-ports-http-admin`).
-
----
-
-## Overlay dev/prod (multi-fichiers)
-
-**Base** `compose.yaml` :
-
-```yaml
-x-service-base: &svc_base
-  restart: unless-stopped
-  logging:
-    driver: json-file
-    options: { max-size: "10m", max-file: "3" }
-
-services:
-  web:
-    <<: *svc_base
-    image: myorg/web:1.2.3
-```
-
-**Prod** `compose.prod.yaml` :
-
-```yaml
-# Redéclare (si besoin) et/ou surcharge
-x-service-base: &svc_base
-  restart: unless-stopped
-  environment:
-    APP_ENV: "production"
-
-services:
-  web:
-    <<: *svc_base
-    image: myorg/web:1.2.3
-    deploy:  # (si tu utilises --compatibility)
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: "512M"
-```
-
-Lance :
+Tu peux les combiner avec la commande :
 
 ```bash
-docker compose -f compose.yaml -f compose.prod.yaml up -d
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+```
+
+ou
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+👉 Docker Compose **fusionne** ces fichiers dans l’ordre :
+
+* le second **écrase ou complète** le premier,
+* le troisième écrase les deux premiers, etc.
+
+---
+
+## 🧱 3️⃣ Exemple concret
+
+### 🧩 **docker-compose.yml** (base commune)
+
+```yaml
+services:
+  app:
+    image: python:3.12-slim
+    command: python -m http.server 8000
+    expose:
+      - "8000"
 ```
 
 ---
 
-## Bonnes pratiques & pièges
+### 🧩 **docker-compose.dev.yml** (extension développement)
 
-* ✅ Donne des **noms clairs** : `x-logging`, `x-healthcheck-http`, `x-service-base`, `x-labels-security`, etc.
-* ✅ Utilise `<<: *ancre` pour **fusionner** des maps (héritage simple).
-* ✅ Valide toujours avec `docker compose config`.
-* ❌ N’attends pas que les **ancres voyagent entre fichiers** : elles sont **locales** au fichier YAML.
-* ❌ N’abuse pas des `x-` : 3-5 blocs bien pensés > 15 fragments illisibles.
+```yaml
+services:
+  app:
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+    command: python -m http.server 8000
+```
 
+---
+
+### 🧩 **docker-compose.prod.yml** (extension production)
+
+```yaml
+services:
+  app:
+    command: gunicorn app.main:app --bind 0.0.0.0:8000
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+```
+
+---
+
+### 🧠 En pratique
+
+#### Pour le développement :
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+```
+
+> 🔹 Ports exposés pour ton navigateur
+> 🔹 Montage du code local (volume)
+> 🔹 Hot reload activé
+
+#### Pour la production :
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+```
+
+> 🔹 Pas de port public direct
+> 🔹 Ressources limitées
+> 🔹 Commande adaptée à la prod (Gunicorn, etc.)
+
+---
+
+## ⚡ 4️⃣ Fusion logique entre fichiers
+
+Quand Docker Compose fusionne les fichiers, il suit des règles précises :
+
+| Type d’élément                            | Comportement                                  |
+| ----------------------------------------- | --------------------------------------------- |
+| **Clés simples** (ex: `image`, `command`) | La dernière valeur **remplace** la précédente |
+| **Listes** (ex: `ports`, `volumes`)       | Les valeurs sont **ajoutées** (concatenées)   |
+| **Objets** (ex: `environment`, `deploy`)  | Les valeurs sont **fusionnées clé par clé**   |
+
+---
+
+### 🧩 Exemple de fusion
+
+Base :
+
+```yaml
+services:
+  web:
+    image: nginx
+    ports:
+      - "80:80"
+```
+
+Override :
+
+```yaml
+services:
+  web:
+    ports:
+      - "8080:80"
+    environment:
+      - MODE=prod
+```
+
+Résultat fusionné :
+
+```yaml
+services:
+  web:
+    image: nginx
+    ports:
+      - "80:80"
+      - "8080:80"
+    environment:
+      - MODE=prod
+```
+
+---
+
+## 📁 5️⃣ Bonnes pratiques professionnelles
+
+| Bonne pratique                                                | Description                                                                             |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| ✅ **Nommer clairement** tes fichiers                          | `docker-compose.dev.yml`, `docker-compose.prod.yml`, `docker-compose.staging.yml`, etc. |
+| ✅ **Toujours garder un fichier `docker-compose.yml` de base** | Contient les définitions communes à tous les environnements                             |
+| ✅ **Ne jamais mélanger dev et prod dans un seul fichier**     | Risque d’erreurs ou d’exposition de ports                                               |
+| ✅ **Toujours spécifier l’ordre avec `-f`**                    | L’ordre compte ! (le dernier écrase les précédents)                                     |
+| ✅ **Utiliser un `.env` séparé**                               | Pour gérer les variables selon l’environnement                                          |
+| ✅ **Utiliser des fichiers d’override distincts**              | Permet d’ajouter des services spécifiques (ex: monitoring, redis, etc.)                 |
+
+---
+
+## 🧠 6️⃣ Exemple professionnel complet (dev/prod)
+
+### 📁 Structure
+
+```
+/home/ubuntu/app1/
+├── docker-compose.yml
+├── docker-compose.dev.yml
+├── docker-compose.prod.yml
+├── .env
+└── backend/
+    ├── Dockerfile
+    ├── requirements.txt
+    └── app/main.py
+```
+
+---
+
+### **docker-compose.yml** (base)
+
+```yaml
+services:
+  backend:
+    build: ./backend
+    expose:
+      - "8000"
+    environment:
+      - TZ=UTC
+    restart: unless-stopped
+```
+
+---
+
+### **docker-compose.dev.yml**
+
+```yaml
+services:
+  backend:
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+---
+
+### **docker-compose.prod.yml**
+
+```yaml
+services:
+  backend:
+    command: gunicorn app.main:app --bind 0.0.0.0:8000 --workers 3
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+```
+
+---
+
+### 🔧 Commandes
+
+* En **dev local** :
+
+  ```bash
+  docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+  ```
+* En **prod sur EC2** :
+
+  ```bash
+  docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+  ```
+
+---
+
+## 🧩 7️⃣ En résumé
+
+| Concept       | Exemple                   | Rôle                  |
+| ------------- | ------------------------- | --------------------- |
+| **Base**      | `docker-compose.yml`      | Fichier commun        |
+| **Extension** | `docker-compose.dev.yml`  | Fichier pour dev      |
+| **Extension** | `docker-compose.prod.yml` | Fichier pour prod     |
+| **Fusion**    | `-f base -f extension`    | Combine les deux      |
+| **Priorité**  | dernier fichier           | Écrase les précédents |
+
+---
+
+## 💡 8️⃣ Combiner avec les *extensions YAML (x-...)*
+
+Les **fichiers étendus (`-f`)** et les **extensions YAML (`x-...`)** sont **complémentaires** :
+
+Tu peux très bien avoir :
+
+```yaml
+# docker-compose.yml
+x-resource-limits: &resources
+  deploy:
+    resources:
+      limits:
+        cpus: "0.5"
+        memory: 512M
+
+services:
+  backend:
+    image: myapp/backend
+    <<: *resources
+```
+
+Puis dans `docker-compose.prod.yml` :
+
+```yaml
+services:
+  backend:
+    command: gunicorn app.main:app --bind 0.0.0.0:8000 --workers 3
+```
+
+👉 Tu obtiens ainsi un **setup ultra-propre** :
+
+* les **extensions YAML** centralisent les règles communes,
+* les **extensions de fichiers** gèrent les environnements.
 
