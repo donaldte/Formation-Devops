@@ -2,7 +2,7 @@ name: GitHub Actions Demo
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  build:
     runs-on: ubuntu-latest
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
@@ -17,13 +17,24 @@ jobs:
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
   
-  build:
+  test:
     # deend du job Explore-GitHub-Actions
-    needs: Explore-GitHub-Actions
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Build the Docker image
         run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - name: Build the Docker image
+        run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+  
+  deploy: 
+    # deend du job build
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Azure Web App
+        run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - name: Deploy to Azure Web App
         run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
