@@ -48,4 +48,19 @@ cd:
    - actions are reusable
      - actions are composable
      - actions are extensible
-     
+
+
+# CONCEPTS GITHUB ACTIONS
+ 
+ 1- workflow: 
+     - c'est un processus d'automatisation de tâche
+     - c'est un fichier YAML (.yml, yaml)
+     - c'est composé de jobs
+  - trigger: 
+    - push, pull_request, schedule, workflow_dispatch, manuel etc..
+
+2- les variables 
+   - variable workflow : env 
+   - variable d'environnement (dev, staging, prod)
+   - variable d'organistation
+   - variable du repetoire
