@@ -1,46 +1,52 @@
-# Jenkins-Zero-To-Hero
+# Jenkins – De Zéro à Héros
 
-Are you looking forward to learn Jenkins right from Zero(installation) to Hero(Build end to end pipelines)? then you are at the right place. 
+Souhaitez-vous apprendre **Jenkins** depuis les bases (installation) jusqu’à un niveau avancé (création de pipelines CI/CD de bout en bout) ?
+Alors vous êtes au bon endroit.
 
-## Installation on EC2 Instance
+---
 
-
+## Installation sur une instance EC2
 
 ![Screenshot 2023-02-01 at 5 46 14 PM](https://user-images.githubusercontent.com/43399466/216040281-6c8b89c3-8c22-4620-ad1c-8edd78eb31ae.png)
 
-Install Jenkins, configure Docker as agent, set up cicd, deploy applications to k8s and much more.
+Installez Jenkins, configurez Docker comme agent, mettez en place un pipeline CI/CD, déployez des applications sur Kubernetes, et bien plus encore.
 
-## AWS EC2 Instance
+---
 
-- Go to AWS Console
-- Instances(running)
-- Launch instances
+## Instance AWS EC2
+
+* Rendez-vous sur la **console AWS**
+* Ouvrez **Instances (running)**
+* Cliquez sur **Launch instances**
 
 <img width="994" alt="Screenshot 2023-02-01 at 12 37 45 PM" src="https://user-images.githubusercontent.com/43399466/215974891-196abfe9-ace0-407b-abd2-adcffe218e3f.png">
 
-### Install Jenkins.
+---
 
-Pre-Requisites:
- - Java (JDK)
+### Installation de Jenkins
 
-### Run the below commands to install Java and Jenkins
+**Prérequis :**
 
-Install Java
+* Java (JDK)
 
-```
+### Exécutez les commandes suivantes pour installer Java et Jenkins
+
+**Installer Java :**
+
+```bash
 sudo apt update
 sudo apt install openjdk-17-jre
 ```
 
-Verify Java is Installed
+**Vérifier l’installation de Java :**
 
-```
+```bash
 java -version
 ```
 
-Now, you can proceed with installing Jenkins
+Vous pouvez maintenant procéder à l’installation de Jenkins :
 
-```
+```bash
 curl -fsSL https://pkg.jenkins.io/debian/jenkins.io-2023.key | sudo tee \
   /usr/share/keyrings/jenkins-keyring.asc > /dev/null
 echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
@@ -50,85 +56,104 @@ sudo apt-get update
 sudo apt-get install jenkins
 ```
 
-**Note: ** By default, Jenkins will not be accessible to the external world due to the inbound traffic restriction by AWS. Open port 8080 in the inbound traffic rules as show below.
+---
 
-- EC2 > Instances > Click on <Instance-ID>
-- In the bottom tabs -> Click on Security
-- Security groups
-- Add inbound traffic rules as shown in the image (you can just allow TCP 8080 as well, in my case, I allowed `All traffic`).
+**Remarque :**
+Par défaut, Jenkins n’est pas accessible depuis l’extérieur à cause des restrictions de trafic entrant imposées par AWS.
+Ouvrez le **port 8080** dans les règles de trafic entrant comme indiqué ci-dessous :
+
+* EC2 > Instances > Cliquez sur votre **Instance-ID**
+* Dans les onglets en bas → **Security**
+* **Security groups**
+* Ajoutez une règle de trafic entrant (vous pouvez autoriser uniquement le **TCP 8080**, ou bien « All traffic » comme dans l’exemple ci-dessous).
 
 <img width="1187" alt="Screenshot 2023-02-01 at 12 42 01 PM" src="https://user-images.githubusercontent.com/43399466/215975712-2fc569cb-9d76-49b4-9345-d8b62187aa22.png">
 
+---
 
-### Login to Jenkins using the below URL:
+### Connexion à Jenkins
 
-http://<ec2-instance-public-ip-address>:8080    [You can get the ec2-instance-public-ip-address from your AWS EC2 console page]
+Accédez à l’URL suivante :
+**http://<adresse-IP-publique-ec2>:8080**
 
-Note: If you are not interested in allowing `All Traffic` to your EC2 instance
-      1. Delete the inbound traffic rule for your instance
-      2. Edit the inbound traffic rule to only allow custom TCP port `8080`
-  
-After you login to Jenkins, 
-      - Run the command to copy the Jenkins Admin Password - `sudo cat /var/lib/jenkins/secrets/initialAdminPassword`
-      - Enter the Administrator password
-      
+(L’adresse IP publique est disponible sur la console AWS EC2.)
+
+**Remarque :**
+Si vous ne souhaitez pas autoriser tout le trafic :
+
+1. Supprimez la règle de trafic entrant existante.
+2. Créez une nouvelle règle pour autoriser uniquement le port **8080 (TCP)**.
+
+---
+
+Après connexion à Jenkins :
+
+* Exécutez la commande suivante pour récupérer le mot de passe administrateur :
+
+  ```bash
+  sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+  ```
+* Entrez ce mot de passe dans l’interface d’administration.
+
 <img width="1291" alt="Screenshot 2023-02-01 at 10 56 25 AM" src="https://user-images.githubusercontent.com/43399466/215959008-3ebca431-1f14-4d81-9f12-6bb232bfbee3.png">
 
-### Click on Install suggested plugins
+---
+
+### Cliquez sur **Install suggested plugins**
 
 <img width="1291" alt="Screenshot 2023-02-01 at 10 58 40 AM" src="https://user-images.githubusercontent.com/43399466/215959294-047eadef-7e64-4795-bd3b-b1efb0375988.png">
 
-Wait for the Jenkins to Install suggested plugins
+Attendez que Jenkins installe les plugins recommandés.
 
 <img width="1291" alt="Screenshot 2023-02-01 at 10 59 31 AM" src="https://user-images.githubusercontent.com/43399466/215959398-344b5721-28ec-47a5-8908-b698e435608d.png">
 
-Create First Admin User or Skip the step [If you want to use this Jenkins instance for future use-cases as well, better to create admin user]
+Créez le premier utilisateur administrateur (recommandé si vous souhaitez utiliser cette instance Jenkins pour d’autres projets futurs), ou passez cette étape.
 
 <img width="990" alt="Screenshot 2023-02-01 at 11 02 09 AM" src="https://user-images.githubusercontent.com/43399466/215959757-403246c8-e739-4103-9265-6bdab418013e.png">
 
-Jenkins Installation is Successful. You can now starting using the Jenkins 
+**L’installation de Jenkins est terminée avec succès !**
+Vous pouvez maintenant commencer à l’utiliser.
 
 <img width="990" alt="Screenshot 2023-02-01 at 11 14 13 AM" src="https://user-images.githubusercontent.com/43399466/215961440-3f13f82b-61a2-4117-88bc-0da265a67fa7.png">
 
-## Install the Docker Pipeline plugin in Jenkins:
+---
 
-   - Log in to Jenkins.
-   - Go to Manage Jenkins > Manage Plugins.
-   - In the Available tab, search for "Docker Pipeline".
-   - Select the plugin and click the Install button.
-   - Restart Jenkins after the plugin is installed.
-   
+## Installation du plugin Docker Pipeline dans Jenkins
+
+1. Connectez-vous à Jenkins.
+2. Allez dans **Manage Jenkins > Manage Plugins**.
+3. Sous l’onglet **Available**, recherchez **Docker Pipeline**.
+4. Sélectionnez le plugin et cliquez sur **Install**.
+5. Redémarrez Jenkins après l’installation.
+
 <img width="1392" alt="Screenshot 2023-02-01 at 12 17 02 PM" src="https://user-images.githubusercontent.com/43399466/215973898-7c366525-15db-4876-bd71-49522ecb267d.png">
 
-Wait for the Jenkins to be restarted.
+Attendez que Jenkins redémarre.
 
+---
 
-## Docker Slave Configuration
+## Configuration d’un agent Docker (Docker Slave)
 
-Run the below command to Install Docker
+Exécutez les commandes suivantes pour installer Docker :
 
-```
+```bash
 sudo apt update
 sudo apt install docker.io
 ```
- 
-### Grant Jenkins user and Ubuntu user permission to docker deamon.
 
-```
+### Donner les permissions nécessaires à Jenkins et à l’utilisateur Ubuntu pour accéder au démon Docker
+
+```bash
 sudo su - 
 usermod -aG docker jenkins
 usermod -aG docker ubuntu
 systemctl restart docker
 ```
 
-Once you are done with the above steps, it is better to restart Jenkins.
+Une fois ces étapes terminées, il est recommandé de redémarrer Jenkins :
 
 ```
-http://<ec2-instance-public-ip>:8080/restart
+http://<adresse-IP-publique-ec2>:8080/restart
 ```
 
-The docker agent configuration is now successful.
-
-
-
-
+✅ **La configuration de l’agent Docker est maintenant réussie.**
