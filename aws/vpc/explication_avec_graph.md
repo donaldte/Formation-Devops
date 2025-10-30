@@ -9,7 +9,6 @@
 6. [Monitoring et Troubleshooting](#6-monitoring-et-troubleshooting)
 
 ---
-
 ## 1. Introduction aux VPC
 
 ### 1.1. Définition d'un VPC
