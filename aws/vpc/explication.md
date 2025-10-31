@@ -874,3 +874,14 @@ Ce cours complet a couvert tous les aspects des VPC AWS, des concepts fondamenta
 5. **Automatisez tout** avec Terraform/CloudFormation
 6. **Documentez votre architecture** pour le troubleshooting
 
+
+
+# thoereme cap 
+ 1- disponibilité (availability) (depot 500xaf)
+ 2- coherance
+ 3- tolerance au panne (resaux)
+
+disponibilité, coherance, tolerance, faibilite, scalabilite, résilience,
+
+ choisir entre : PC(500) ou PD (facebook) 
+
