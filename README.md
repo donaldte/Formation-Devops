@@ -87,7 +87,7 @@ Nous encourageons les contributions ! Voici comment tu peux aider :
 ---
 
 ## 📜 **Licence**
-Ce projet est sous licence **MIT**. Tu peux l'utiliser, le modifier et le redistribuer librement.
+Ce projet est sous licence [**MIT**](https://github.com/cisse410/Formation-Devops/blob/feat/license/LICENSE.md). Tu peux l'utiliser, le modifier et le redistribuer librement.
 
 ---
 
