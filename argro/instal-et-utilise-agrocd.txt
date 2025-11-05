@@ -5,3 +5,6 @@ kubeectl edit svc argocd-server -n argocd
 sudo socat TCP-LISTEN:30090,fork TCP:192.168.58.2:31829 &
 jII6WCLj6YzkmvUv
 argocd login 192.168.58.2:31829 --username admin --password jII6WCLj6YzkmvUv --insecure
+
+
+

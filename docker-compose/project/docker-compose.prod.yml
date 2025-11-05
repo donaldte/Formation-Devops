@@ -1,0 +1,17 @@
+# =============================
+# 🚀 Docker Compose - Prod
+# =============================
+
+services:
+  backend:
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+  nginx:
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro  # lecture seule
+      - ./frontend:/usr/share/nginx/html:ro  # lecture seule
+
+
+# docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build

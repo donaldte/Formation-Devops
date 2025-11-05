@@ -1,0 +1,71 @@
+# =============================
+# 📦 Docker Compose V2 - Base
+# =============================
+
+x-default-env: &default-env
+  TZ: ${TZ:-UTC}
+
+x-resource-limits: &default-resources
+  deploy:
+    resources:
+      limits:
+        cpus: "0.50" # 50% d'un CPU
+        memory: 512M # max 512MB
+      reservations: 
+        memory: 128M
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: app1_db
+    env_file: .env
+    environment:
+      <<: *default-env
+    volumes:
+      - app1_pgdata:/var/lib/postgresql/data
+    networks:
+      - app1_net
+    restart: unless-stopped
+    <<: *default-resources
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: app1_backend # nom unique à retirer si tu veux scaler le service
+    env_file: .env
+    environment:
+      <<: *default-env
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    expose:
+      - "8000"  # interne seulement
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app1_net
+    restart: unless-stopped
+    <<: *default-resources
+
+  nginx:
+    image: nginx:alpine
+    container_name: app1_nginx
+    depends_on:
+      - backend
+    networks:
+      - app1_net
+    restart: unless-stopped
+    <<: *default-resources
+
+networks:
+  app1_net:
+    name: app1_net
+
+volumes:
+  app1_pgdata:
+    name: app1_pgdata

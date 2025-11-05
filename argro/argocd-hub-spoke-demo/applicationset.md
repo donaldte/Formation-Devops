@@ -16,6 +16,18 @@ spec:
           - name: spoke2
             cluster: spoke-cluster-2
             namespace: default
+          - name: spoke3
+            cluster: spoke-cluster-3
+            namespace: default
+          - name: spoke4
+            cluster: spoke-cluster-4
+            namespace: default
+          - name: spoke5
+            cluster: spoke-cluster-5
+            namespace: default
+          - name: spoke6
+            cluster: spoke-cluster-6
+            namespace: default
   template:
     metadata:
       name: guestbook-{{name}}

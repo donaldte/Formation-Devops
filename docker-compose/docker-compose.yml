@@ -1,109 +1,140 @@
-version: '3.9'
+version: "3.9"  # Version du format Compose (3.9 est stable et moderne)
 
-# Définition des services (conteneurs)
+# Définition des réseaux (un réseau interne pour la com entre services)
+networks:
+  app_net:
+    driver: bridge  # Réseau bridge Docker par défaut, isole les services
+
+# Définition des volumes persistants (données qui survivent aux redémarrages)
+volumes:
+  postgres_data:  # Volume pour stocker les données PostgreSQL durablement
+
+# Définition d’une configuration de logs commune pour éviter de saturer le disque
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"   # Chaque fichier log max 10 Mo
+    max-file: "3"     # Conserver seulement 3 fichiers
+
 services:
 
-  # Premier serveur web (application Python, Node.js, etc.)
-  web1:
-    build: .  # Construit l'image Docker à partir du Dockerfile dans le même dossier
-    container_name: web1  # Nom du conteneur pour l'identifier facilement
-    restart: always  # Redémarre automatiquement le conteneur si il crash
-    command: /entrypoint.sh  # Commande principale à exécuter au lancement
-    volumes:
-      - .:/app  # Monte le dossier local ./ dans /app du conteneur (code source)
-    ports:
-      - "8020:8000"  # Redirige le port externe 8020 vers le port 8000 du conteneur
-    environment:
-      - SERVER_NAME=${SERVER_NAME_WEB1}  # Variables d'environnement pour configurer l'app
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_HOST=${POSTGRES_HOST}
-    depends_on:
-      - redis  # Lance redis avant web1
-      - database  # Lance la base de données avant web1
-    networks:
-      - mynetwork  # Relie web1 au réseau interne mynetwork
-    stdin_open: true  # Garde le terminal ouvert (utile pour debug interactif)
-    tty: true         # Alloue un pseudo-TTY
+  # ----------------------
+  # Application Web
+  # ----------------------
+  web:
+    container_name: web_app   # Nom du conteneur (optionnel) --scale web=3 pour dupliquer
+    build:
+      context: .              # Construit l'image depuis le Dockerfile à la racine
+      dockerfile: Dockerfile  # Précise le Dockerfile (optionnel si nom par défaut)
+      target: dev             # Étape de build (dev ou prod si multi-stage)
+    # image: ton-registry/ton-app:1.0.0   # En production, utilise une image versionnée
 
-  # Deuxième serveur web (identique à web1, sur un autre port)
-  web2:
-    build: .
-    container_name: web2
-    restart: always
-    command: /entrypoint.sh
-    volumes:
-      - .:/app
-    ports:
-      - "8021:8000"  # Redirige le port externe 8021 vers 8000 interne
-    environment:
-      - SERVER_NAME=${SERVER_NAME_WEB2}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_HOST=${POSTGRES_HOST}
-    depends_on:
-      - redis
-      - database
+    restart: unless-stopped   # Redémarre sauf si on l’arrête volontairement
+    env_file: .env            # Charge toutes les variables sensibles depuis .env
+    command: /entrypoint.sh   # Script de démarrage custom
+    depends_on:               # Démarrage conditionnel (avec healthchecks)
+      redis:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+    healthcheck:              # Vérifie que le service web est bien up
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/healthz || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
     networks:
-      - mynetwork
+      - app_net
+    logging: *default-logging
+
+    # Profil DEV : bind mount + accès terminal
+    profiles: ["dev"]
+    volumes:
+      - .:/app    # Monte le code local pour un dev rapide (NE PAS utiliser en prod)
     stdin_open: true
     tty: true
 
-  # Service Redis (base de données clé-valeur en mémoire ultra rapide)
+  # ----------------------
+  # Redis
+  # ----------------------
   redis:
-    image: redis:7  # Utilise l'image officielle Redis version 7
-    container_name: redis
-    restart: always
+    image: redis:7.2
+    restart: unless-stopped
     networks:
-      - mynetwork
+      - app_net
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
 
-  # Service PostgreSQL (base de données relationnelle)
+    # Options de sécurité (production)
+    profiles: ["prod"]
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL   # Supprime toutes les capacités root inutiles
+
+  # ----------------------
+  # PostgreSQL
+  # ----------------------
   database:
-    image: postgres:15  # Utilise l'image officielle PostgreSQL version 15
-    container_name: postgres_db
-    restart: always
+    image: postgres:15.6
+    restart: unless-stopped
+    env_file: .env   # Charge DB, USER, PASSWORD depuis .env
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}  # Variables d'environnement pour configurer PostgreSQL
+      - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
-      - postgres_data:/var/lib/postgresql/data  # Persiste les données PostgreSQL sur le disque hôte
-    ports:
-      - "5432:5432"  # Permet de se connecter à PostgreSQL depuis l'extérieur
+      - postgres_data:/var/lib/postgresql/data
     networks:
-      - mynetwork
+      - app_net
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
-  # Serveur Nginx (reverse proxy / load balancer pour web1 et web2)
+    # En dev : expose le port pour se connecter avec un client SQL
+    profiles: ["dev"]
+    ports:
+      - "5432:5432"
+
+    # En prod : sécurité renforcée (pas de port exposé)
+    # profiles: ["prod"]
+    # read_only: true
+    # security_opt:
+    #   - no-new-privileges:true
+    # cap_drop:
+    #   - ALL
+
+  # ----------------------
+  # Nginx (reverse proxy / load balancer)
+  # ----------------------
   nginx:
-    image: nginx:latest  # Utilise l'image officielle Nginx dernière version
-    container_name: nginx
-    restart: always
-    ports:
-      - "80:80"  # Expose Nginx sur le port 80 HTTP standard
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf  # Utilise ton fichier de configuration personnalisé
+    image: nginx:1.25   # Toujours versionner (pas latest)
+    restart: unless-stopped
     depends_on:
-      - web1
-      - web2
+      web:
+        condition: service_healthy
+    ports:
+      - "80:80"   # Expose en HTTP
+      # - "443:443"  # Pour SSL (optionnel)
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      # - ./nginx/certs:/etc/nginx/certs:ro   # Certificats TLS en prod
     networks:
-      - mynetwork
-
-# Définition du réseau privé entre les services
-networks:
-  mynetwork:
-    driver: bridge  # Réseau bridge Docker classique pour la communication interne
-
-# Définition du volume persistant pour PostgreSQL
-volumes:
-  postgres_data:  # Volume pour stocker les données PostgreSQL de manière durable
-
-
-# les commandes pour docker compose 
-# docker-compose up -d --build  # Lancer les conteneurs en arrière-plan et reconstruire les images
-# docker-compose down  # Arrêter et supprimer les conteneurs, réseaux et volumes
-# docker-compose logs  # Afficher les logs des conteneurs
-# docker exec web1 bash  # Accéder au terminal du conteneur web1
-# docker ps  # Afficher l'état des conteneurs
-# docker stop  # Arrêter les conteneurs sans les supprimer
+      - app_net
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost/ || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s

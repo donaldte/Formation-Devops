@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+gunicorn
+redis
+psycopg2-binary

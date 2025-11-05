@@ -1,0 +1,82 @@
+# name: deployment test
+# run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+
+# declancher 
+
+#on: [push, pull_request]
+
+# on:
+#   issues:
+#     types: [opened, edited, milestoned, demilestoned, closed, reopened]
+
+# on: 
+#     push:
+#         branches:
+#             - main
+#             - master
+#             - 'release/*'
+
+
+# on: 
+#     issues:
+#         types: [opened, edited, milestoned, demilestoned, closed, reopened]
+#     push:
+#         branches:
+#             - main
+#             - master
+#             - 'release/*'
+#     pull_request:
+#         branches:
+#             - main
+#             - master
+#             - 'release/*'
+#     tags:
+#         - v2
+#         - 'v2.*.*'        
+
+
+# on: 
+#     schedule:
+#         - cron: '0 0 * * *'  # tous les jours à minuit
+#         - cron: '0 12 * * 1,2'  # tous les lundis et mardis à midi
+#         - cron: '30 5 * * 1,3,5'  # les lundis, mercredis et vendredis à 5h30 du matin
+
+# permissions: 
+#     contents: read
+#     packages: write
+#     pull-requests: write
+
+# concurrency: 
+#     group: ${{ github.workflow }}-${{ github.ref }}
+#     cancel-in-progress: true
+
+
+# jobs: 
+#     build: 
+#         runs-on: ubuntu-latest
+#         steps: 
+#             - uses: actions/checkout@v3
+#             - name: Build the Docker image
+#               run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+#             - name: Build the Docker image
+#               run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+
+#     test: 
+#         needs: build
+#         runs-on: ubuntu-latest
+#         steps: 
+#             - uses: actions/checkout@v3
+#             - name: Build the Docker image
+#               run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+#             - name: Build the Docker image
+#               run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+
+#     deploy: 
+#         needs: [build, test]
+#         runs-on: ubuntu-latest
+#         steps: 
+#             - uses: ./.github/actions/hello
+#             - name: Deploy to Azure Web App
+#               run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+#             - name: Deploy to Azure Web App
+#               run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"

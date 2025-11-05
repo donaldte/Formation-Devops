@@ -1,0 +1,44 @@
+name: GitHub Actions Demo
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+on: [push]
+
+env: 
+  MY_VAR: my_value
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event. my var is ${{ env.MY_VAR }}"
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}. $MY_VAR"
+      - name: Check out repository code
+        uses: actions/checkout@v5
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+  
+  test:
+    # deend du job Explore-GitHub-Actions
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build the Docker image
+        run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - name: Build the Docker image
+        run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+  
+  deploy: 
+    # deend du job build
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to Azure Web App
+        run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - name: Deploy to Azure Web App
+        run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"

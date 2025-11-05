@@ -1,0 +1,1 @@
+#  Un pipeline jenkins simple pour vérifier si la configuration du slave docker fonctionne comme prévu.
