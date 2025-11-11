@@ -10,14 +10,14 @@ terraform {
 }
 
 provider "aws" {  # ceci est une configuration du provider aws
-  region  = "us-west-2"
+  region  = "us-east-1"
 }
 
 resource "aws_instance" "app_server" { # ceci est une configuration de la ressource aws_instance
-  ami           = "ami-830c94e3"
+  ami           = "ami-0023921b4fcd5382b" # ceci est une configuration de l'AMI
   instance_type = "t2.micro"
 
   tags = {
     Name = "tutoYoutubeEc2" # ceci est une configuration des tags
-  }
+  } 
 }
