@@ -14,7 +14,7 @@ services:
     restart: unless-stopped
 
   sonarqube:
-    image: sonarqube:2025.1-community
+    image: sonarqube:lts
     container_name: sonarqube
     depends_on:
       - postgres
