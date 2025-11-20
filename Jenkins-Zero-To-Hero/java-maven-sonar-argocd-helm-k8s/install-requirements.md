@@ -17,6 +17,10 @@ sudo apt install docker-ce docker-ce-cli containerd.io -y
 sudo usermod -aG docker $USER
 ```
 
+## Installer Docker Compose
+
+Doucmentation: https://docs.docker.com/compose/install/linux/
+
 ## Installer Jenkins 
 
 ### documentation jenkins 
@@ -115,7 +119,7 @@ http://<ip-address-public>:30007
 ### aller au dossier sonarqube
 
 ```sh
-cd sonarqube
+cd /Formation-Devops/Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/sonarqube
 ```
 
 ### Créer les volumes (ils seront créés automatiquement) 
@@ -145,13 +149,13 @@ echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 ### Lancer SonarQube
 
 ```sh
-docker-compose up -d
+docker compose up -d
 ```
 
 ### voir les logs
 
 ```sh
-docker-compose logs -f
+docker compose logs -f
 ```
 
 ### attendre le message 
