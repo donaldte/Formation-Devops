@@ -1,62 +1,144 @@
-# Spring Boot based Java web application
- 
-This is a simple Sprint Boot based Java application that can be built using Maven. Sprint Boot dependencies are handled using the pom.xml 
-at the root directory of the repository.
 
-This is a MVC architecture based application where controller returns a page with title and message attributes to the view.
 
-## Execute the application locally and access it using your browser
+# 🚀 **Application Web Java Spring Boot – DevOps CI/CD (Maven, Jenkins, SonarQube, ArgoCD, Helm, Kubernetes)**
 
-Checkout the repo and move to the directory
+Ce dépôt contient une application web Java basée sur **Spring Boot**, conçue pour être utilisée dans un pipeline CI/CD complet incluant :
+
+* Maven
+* Jenkins
+* SonarQube
+* Docker
+* Helm
+* Kubernetes
+* ArgoCD
+
+L’application suit l’architecture **MVC**, où un contrôleur renvoie une page contenant les attributs **title** et **message** à la vue.
+
+---
+
+# 📁 **Cloner ce dépôt**
 
 ```
-git clone https://github.com/iam-veeramalla/Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/sprint-boot-app
-cd java-maven-sonar-argocd-helm-k8s/sprint-boot-app
+git clone https://github.com/donaldte/Formation-Devops.git
+cd /Formation-Devops/Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app
 ```
 
-Execute the Maven targets to generate the artifacts
+---
+
+# 🛠️ Installer Maven sur Linux
+
+## ✔️ Méthode simple (recommandée – Ubuntu/Debian)
+
+```
+sudo apt update
+sudo apt install maven -y
+```
+
+Vérifier l’installation :
+
+```
+mvn -v
+```
+
+---
+
+## ✔️ Méthode avancée (pour installer la dernière version officielle)
+
+```
+wget https://dlcdn.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz
+tar -xvzf apache-maven-3.9.6-bin.tar.gz
+sudo mv apache-maven-3.9.6 /opt/maven
+```
+
+Ajouter Maven au PATH :
+
+```
+sudo nano /etc/profile.d/maven.sh
+```
+
+Ajouter :
+
+```
+export M2_HOME=/opt/maven
+export MAVEN_HOME=/opt/maven
+export PATH=${M2_HOME}/bin:${PATH}
+```
+
+Charger la configuration :
+
+```
+source /etc/profile.d/maven.sh
+```
+
+Vérifier :
+
+```
+mvn -v
+```
+
+---
+
+# 📦 **Construire et exécuter l'application**
+
+## 🔧 Générer les artefacts avec Maven
 
 ```
 mvn clean package
 ```
 
-The above maven target stroes the artifacts to the `target` directory. You can either execute the artifact on your local machine
-(or) run it as a Docker container.
+Les artefacts seront générés dans le dossier `target/`.
 
-** Note: To avoid issues with local setup, Java versions and other dependencies, I would recommend the docker way. **
+Vous pouvez ensuite :
 
+* Exécuter localement l’artefact
+* L’utiliser dans Docker
+* L’intégrer dans un pipeline CI/CD
 
-### Execute locally (Java 11 needed) and access the application on http://localhost:8080
+---
+
+# ▶️ **Exécution locale (nécessite Java 11 ou plus)**
 
 ```
 java -jar target/spring-boot-web.jar
 ```
 
-### The Docker way
+Accès à l’application :
 
-Build the Docker Image
+👉 [http://localhost:8080](http://localhost:8080)
+
+---
+
+# 🐳 **Exécution avec Docker (méthode recommandée)**
+
+## 1. Construire l'image Docker
 
 ```
 docker build -t ultimate-cicd-pipeline:v1 .
 ```
 
+## 2. Lancer le conteneur
+
 ```
 docker run -d -p 8010:8080 -t ultimate-cicd-pipeline:v1
 ```
 
-Hurray !! Access the application on `http://<ip-address>:8010`
+Accès :
 
+👉 http://<ip-address>:8010
 
-## Next Steps
+---
 
-### Configure a Sonar Server locally
+# 🧭 **Configuration d'un serveur SonarQube local**
+
+## ✔️ Prérequis système
+
+* Java 17+ (Oracle JDK, OpenJDK ou AdoptOpenJDK)
+* Minimum 2 Go RAM
+* 2 CPU
+
+## ✔️ Installation de SonarQube (méthode manuelle)
 
 ```
-System Requirements
-Java 17+ (Oracle JDK, OpenJDK, or AdoptOpenJDK)
-Hardware Recommendations:
-   Minimum 2 GB RAM
-   2 CPU cores
 sudo apt update && sudo apt install unzip -y
 adduser sonarqube
 wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-10.4.1.88267.zip
@@ -67,6 +149,45 @@ cd /opt/sonarqube/bin/linux-x86-64
 ./sonar.sh start
 ```
 
-Hurray !! Now you can access the `SonarQube Server` on `http://<ip-address>:9000` 
+Accès :
+
+👉 http://<ip-address>:9000
+
+Identifiants par défaut SonarQube :
+
+* **admin / admin**
+
+---
+
+# 🔗 **Intégration des outils DevOps**
+
+Ce projet est conçu pour fonctionner avec :
+
+### ✔️ Jenkins (CI)
+
+* Build Maven
+* Analyse SonarQube
+* Construction d’image Docker
+* Push Docker Hub ou ECR
+
+### ✔️ SonarQube (Code Quality)
+
+* Analyse du code Java
+* Quality Gate
+* Intégration Jenkins via webhook
+
+### ✔️ Helm (Packaging)
+
+* Déploiement de l’application sous forme de Chart Helm
+
+### ✔️ Kubernetes (Orchestration)
+
+* Déploiement via kubectl ou Helm
+* Exposition via Service NodePort ou Ingress
+
+### ✔️ ArgoCD (CD GitOps)
+
+* Sync automatique des déploiements
+* Mise à jour continue après chaque commit
 
 

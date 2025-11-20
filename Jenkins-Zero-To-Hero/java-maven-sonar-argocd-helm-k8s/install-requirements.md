@@ -112,3 +112,56 @@ http://<ip-address-public>:30007
 
 ## Installer SonarQube
 
+### aller au dossier sonarqube
+
+```sh
+cd sonarqube
+```
+
+### Créer les volumes (ils seront créés automatiquement) 
+
+```sh
+docker volume ls 
+```
+
+### Augmenter les limites système (OBLIGATOIRE pour SonarQube)
+
+```sh
+echo "vm.max_map_count=524288" | sudo tee -a /etc/sysctl.conf
+echo "fs.file-max=131072" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+```
+
+###  Créer un swap (si EC2 RAM < 8 Go) 
+
+```sh
+sudo fallocate -l 4G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
+### Lancer SonarQube
+
+```sh
+docker-compose up -d
+```
+
+### voir les logs
+
+```sh
+docker-compose logs -f
+```
+
+### attendre le message 
+ 
+```sh
+SonarQube is operational
+```
+
+### accéder à sonarqube
+
+```sh
+http://<ip-address-public>:9000
+```

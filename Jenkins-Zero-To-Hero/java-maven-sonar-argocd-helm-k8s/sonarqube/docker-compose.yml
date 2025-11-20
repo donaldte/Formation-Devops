@@ -1,0 +1,43 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: sonar-postgres
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB: sonar
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sonarnet
+    restart: unless-stopped
+
+  sonarqube:
+    image: sonarqube:lts
+    container_name: sonarqube
+    depends_on:
+      - postgres
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonar_data:/opt/sonarqube/data
+      - sonar_extensions:/opt/sonarqube/extensions
+      - sonar_logs:/opt/sonarqube/logs
+    networks:
+      - sonarnet
+    restart: unless-stopped
+
+networks:
+  sonarnet:
+
+volumes:
+  postgres_data:
+  sonar_data:
+  sonar_extensions:
+  sonar_logs:
