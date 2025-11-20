@@ -16,10 +16,10 @@ Prerequisites:
 Steps:
 
     1. Install the necessary Jenkins plugins:
-       1.1 Git plugin
-       1.2 Maven Integration plugin
-       1.3 Pipeline plugin
-       1.4 Kubernetes Continuous Deploy plugin
+       1.1 Git plugin the name on available plugins is `Git`
+       1.2 Maven Integration plugin the name on available plugins is `Maven Integration`
+       1.3 Pipeline plugin the name on available plugins is `Docker Pipeline`
+       1.4 Kubernetes Continuous Deploy plugin the name on available plugins is `Kubernetes Continuous Deploy`
 
     2. Create a new Jenkins pipeline:
        2.1 In Jenkins, create a new pipeline job and configure it with the Git repository URL for the Java application.

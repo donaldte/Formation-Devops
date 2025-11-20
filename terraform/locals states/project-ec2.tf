@@ -9,7 +9,7 @@ terraform {
     }
   }
 
-  required_version = ">= 1.2.0"# ceci voudrait dire que la version de terraform doit être supérieure ou égale à 1.2.0
+  required_version = ">= 1.2.0" # ceci voudrait dire que la version de terraform doit être supérieure ou égale à 1.2.0
 }
 
 provider "aws" {
