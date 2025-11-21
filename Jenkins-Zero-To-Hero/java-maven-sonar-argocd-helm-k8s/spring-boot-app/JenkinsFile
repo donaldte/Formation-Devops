@@ -86,27 +86,28 @@ pipeline {
     // 4. MISE À JOUR DU MANIFESTE KUBERNETES (HORS DOCKER)
     /////////////////////////////////////////////////////////
     stage('4. Mise à jour du manifeste Kubernetes') {
-      agent none
-      steps {
-        withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-          sh '''
-            cd $WORKSPACE
+    agent none
+    steps {
+      withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+        sh '''
+          # On force un checkout propre sur le nœud Jenkins
+          rm -rf $WORKSPACE/*
+          git clone https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git $WORKSPACE
+          cd $WORKSPACE
 
-            git config user.email "donaldtedom0@gmail.com"
-            git config user.name "donaldte"
+          git config user.email "donaldtedom0@gmail.com"
+          git config user.name "donaldte"
 
-            sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" \
-              Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
+          sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" \
+            Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
 
-            git add Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-
-            git commit -m "Mise à jour de l'image Docker vers la version ${BUILD_NUMBER}" || true
-
-            git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main
-          '''
-        }
+          git add Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
+          git commit -m "Bump image to ${BUILD_NUMBER}" || echo "No changes"
+          git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main
+        '''
       }
     }
+}
 
   } // end stages
 
