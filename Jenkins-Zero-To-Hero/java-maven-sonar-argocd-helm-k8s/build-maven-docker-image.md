@@ -35,21 +35,19 @@ FROM maven:3.9.6-eclipse-temurin-17
 
 USER root
 
-# Installer Docker CLI dans l'agent
 RUN apt-get update && \
     apt-get install -y curl git unzip && \
     curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-24.0.7.tgz \
-        | tar xz --strip-components=1 -C /usr/local/bin docker/docker && \
-    apt-get clean
+    | tar xz --strip-components=1 -C /usr/local/bin docker/docker
 
-# Ajouter utilisateur Jenkins (pas obligatoire)
-RUN useradd -m jenkins
-
-USER jenkins
+# Optionnel : inclure kubectl / helm plus tard
+# RUN curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+# RUN chmod +x kubectl && mv kubectl /usr/local/bin/
 
 WORKDIR /home/jenkins
 
-ENTRYPOINT ["cat"]
+# Garde le conteneur vivant
+ENTRYPOINT ["tail", "-f", "/dev/null"]
 ```
 
 ---
