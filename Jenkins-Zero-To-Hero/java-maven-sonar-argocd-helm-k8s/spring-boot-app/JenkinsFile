@@ -107,7 +107,7 @@ pipeline {
             git config user.email "donaldtedom0@gmail.com"
             git config user.name "donaldte"
 
-            sed -i "/image:[[:space:]]*donald284\\/ultimate-cicd:/ s/:.*\$/:${BUILD_NUMBER}/" \
+            sed -i "s#image: donald284/ultimate-cicd:.*#image: donald284/ultimate-cicd:${BUILD_NUMBER}#" \
               Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
 
             git add Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml

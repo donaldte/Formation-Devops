@@ -1,3 +1,4 @@
+#donald284/ultimate-cicd:<BUILD_NUMBER>
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,6 +17,6 @@ spec:
     spec:
       containers:
       - name: spring-boot-app
-        image: donald284/ultimate-cicd:replaceImageTag
+        image: donald284/ultimate-cicd:<BUILD_NUMBER>
         ports:
         - containerPort: 8080
