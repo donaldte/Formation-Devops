@@ -1,5 +1,8 @@
 pipeline {
 
+  ////////////////////////////////////////////////////////////////////////////
+  // AGENT DOCKER POUR LES BUILDS MAVEN, SONAR, DOCKER
+  ////////////////////////////////////////////////////////////////////////////
   agent {
     docker {
       image 'donald284/maven-jenkins-agent:v3'
@@ -7,22 +10,25 @@ pipeline {
     }
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  // VARIABLES D’ENVIRONNEMENT
+  ////////////////////////////////////////////////////////////////////////////
   environment {
     DOCKER_IMAGE = "donald284/ultimate-cicd:${BUILD_NUMBER}"
     GIT_REPO_NAME = "Formation-Devops"
     GIT_USER_NAME = "donaldte"
-    // SONAR_URL vient de l'environnement global Jenkins (Manage Jenkins > Configure System)
+    // SONAR_URL vient de Jenkins (Manage Jenkins > Configure System > Global Env Vars)
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  // STAGES
+  ////////////////////////////////////////////////////////////////////////////
   stages {
 
-    stage('1. Checkout du code') {
-      steps {
-        git branch: 'main', url: "https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git"
-      }
-    }
-
-    stage('2. Build et Tests (Maven)') {
+    /////////////////////////////////////////////////////////
+    // 1. BUILD MAVEN
+    /////////////////////////////////////////////////////////
+    stage('1. Build et Tests (Maven)') {
       steps {
         sh '''
           cd Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app
@@ -31,7 +37,10 @@ pipeline {
       }
     }
 
-    stage('3. Analyse Statique SonarQube') {
+    /////////////////////////////////////////////////////////
+    // 2. ANALYSE SONARQUBE
+    /////////////////////////////////////////////////////////
+    stage('2. Analyse Statique SonarQube') {
       steps {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
           sh """
@@ -44,19 +53,28 @@ pipeline {
       }
     }
 
-    stage('4. Build et Push de l’image Docker') {
+    /////////////////////////////////////////////////////////
+    // 3. BUILD & PUSH DOCKER IMAGE
+    /////////////////////////////////////////////////////////
+    stage('3. Build et Push de l’image Docker') {
       steps {
         script {
+
+          // Build Docker
           sh """
             cd Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app
             docker build -t ${DOCKER_IMAGE} .
           """
 
+          // Push version tag
           docker.withRegistry('https://index.docker.io/v1/', "docker-cred") {
             docker.image("${DOCKER_IMAGE}").push()
           }
 
+          // Tag latest
           sh "docker tag ${DOCKER_IMAGE} donald284/ultimate-cicd:latest"
+
+          // Push latest
           docker.withRegistry('https://index.docker.io/v1/', "docker-cred") {
             docker.image("donald284/ultimate-cicd:latest").push()
           }
@@ -64,7 +82,12 @@ pipeline {
       }
     }
 
-    stage('5. Mise à jour du manifeste Kubernetes') {
+    /////////////////////////////////////////////////////////
+    // 4. MISE À JOUR DU MANIFESTE KUBERNETES (HORS DOCKER)
+    /////////////////////////////////////////////////////////
+    stage('4. Mise à jour du manifeste Kubernetes') {
+      agent any   // IMPORTANT : execute sur agent Jenkins → .git disponible
+
       steps {
         withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
           sh '''
@@ -86,8 +109,11 @@ pipeline {
       }
     }
 
-  } // fin stages
+  } // end stages
 
+  ////////////////////////////////////////////////////////////////////////////
+  // NOTIFICATIONS SLACK
+  ////////////////////////////////////////////////////////////////////////////
   post {
 
     success {
@@ -101,11 +127,11 @@ pipeline {
     failure {
       slackSend(
         channel: '#general',
-        color: '#e00505ff',
+        color: '#ff0000',
         message: "❌ FAILURE — Le pipeline a échoué au build *#${BUILD_NUMBER}*. ⚠️"
       )
     }
 
-  } // fin post
+  } // end post
 
-} // fin pipeline
+} // end pipeline
