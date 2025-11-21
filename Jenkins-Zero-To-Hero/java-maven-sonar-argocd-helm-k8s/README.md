@@ -2,9 +2,8 @@
 
 # 🚀 Pipeline Jenkins pour une application Java avec Maven, SonarQube, Argo CD, Helm et Kubernetes
 
-Voici les étapes détaillées pour mettre en place un pipeline CI/CD complet avec Jenkins pour une application Java utilisant Maven, SonarQube, Helm, Argo CD et Kubernetes.
+# image de jenkins pipeline
 
----
 
 ## ✅ **Prérequis**
 
