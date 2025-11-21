@@ -90,23 +90,41 @@ pipeline {
     steps {
       withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
         sh '''
-          # On force un checkout propre sur le nœud Jenkins
-          rm -rf $WORKSPACE && mkdir -p $WORKSPACE  # ← supprime TOUT le workspace puis le recrée vide
-          git clone https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git $WORKSPACE
-          cd $WORKSPACE
+          set -e
+
+          # On travaille dans un dossier temporaire pour éviter le lock de Jenkins
+          REPO_DIR="$WORKSPACE/temp-gitops-repo"
+          rm -rf "$REPO_DIR"
+          mkdir -p "$REPO_DIR"
+
+          echo "Clonage du dépôt dans un dossier temporaire..."
+          git clone https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git "$REPO_DIR"
+          cd "$REPO_DIR"
 
           git config user.email "donaldtedom0@gmail.com"
           git config user.name "donaldte"
 
+          # Mise à jour du tag d'image
           sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" \
             Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
 
           git add Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-          git commit -m "Bump image to ${BUILD_NUMBER}" || echo "No changes"
+
+          if git diff --staged --quiet; then
+            echo "Aucun changement détecté dans le manifeste → rien à pousser"
+            exit 0
+          fi
+
+          git commit -m "Deploy spring-boot-app v${BUILD_NUMBER} (Jenkins build #${BUILD_NUMBER})"
+
+          echo "Push vers GitHub en cours..."
           git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main
+
+          echo "Mise à jour Git réussie ! ArgoCD va déployer la version ${BUILD_NUMBER} dans quelques secondes."
         '''
       }
     }
+}
 }
 
   } // end stages
