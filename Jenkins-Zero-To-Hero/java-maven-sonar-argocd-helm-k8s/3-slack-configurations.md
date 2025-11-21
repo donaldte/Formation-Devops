@@ -14,7 +14,7 @@ Grâce au **plugin officiel Slack Notification**.
 ### 1.1. Ajouter l’application Slack "Jenkins CI"
 
 1. Ouvrir Slack
-2. Aller dans : **Browse Apps**
+2. Aller dans : **marketplace app**
 3. Rechercher : **Jenkins CI**
 4. Cliquer sur **Add to Slack**
 5. Choisir le channel (ex : `#general`)
