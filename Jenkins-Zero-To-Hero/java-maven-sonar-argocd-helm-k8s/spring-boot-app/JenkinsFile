@@ -1,5 +1,10 @@
 pipeline {
 
+  options {
+        skipDefaultCheckout(true)      // désactive le checkout optimisé de Jenkins
+        timeout(time: 30, unit: 'MINUTES')  // optionnel
+    }
+
   ////////////////////////////////////////////////////////////////////////////
   // AGENT DOCKER POUR MAVEN + SONAR + DOCKER BUILDS
   ////////////////////////////////////////////////////////////////////////////
