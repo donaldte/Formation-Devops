@@ -91,7 +91,7 @@ pipeline {
       withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
         sh '''
           # On force un checkout propre sur le nœud Jenkins
-          rm -rf $WORKSPACE/*
+          rm -rf $WORKSPACE && mkdir -p $WORKSPACE  # ← supprime TOUT le workspace puis le recrée vide
           git clone https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git $WORKSPACE
           cd $WORKSPACE
 
