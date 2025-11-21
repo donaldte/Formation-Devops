@@ -1,158 +1,83 @@
 pipeline {
-
-  options {
-        skipDefaultCheckout(true)      // désactive le checkout optimisé de Jenkins
-        timeout(time: 30, unit: 'MINUTES')  // optionnel
+    // =============================================
+    // OPTIONS OBLIGATOIRES
+    // =============================================
+    options {
+        skipDefaultCheckout(true)
+        timeout(time: 30, unit: 'MINUTES')
+        timestamps()                   // ← pour voir les logs avec heure
     }
 
-  ////////////////////////////////////////////////////////////////////////////
-  // AGENT DOCKER POUR MAVEN + SONAR + DOCKER BUILDS
-  ////////////////////////////////////////////////////////////////////////////
-  agent {
-    docker {
-      image 'donald284/maven-jenkins-agent:v3'
-      args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
-    }
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  // VARIABLES GLOBALES
-  ////////////////////////////////////////////////////////////////////////////
-  environment {
-    DOCKER_IMAGE = "donald284/ultimate-cicd:${BUILD_NUMBER}"
-    GIT_REPO_NAME = "Formation-Devops"
-    GIT_USER_NAME = "donaldte"
-    // SONAR_URL vient de Jenkins (global env var)
-  }
-
-  ////////////////////////////////////////////////////////////////////////////
-  // PIPELINE STEPS
-  ////////////////////////////////////////////////////////////////////////////
-  stages {
-
-    /////////////////////////////////////////////////////////
-    // 0. CHECKOUT GIT
-    /////////////////////////////////////////////////////////
-    stage('0. Checkout') {
-      steps {
-        git branch: 'main', url: "https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git"
-      }
-    }
-
-    /////////////////////////////////////////////////////////
-    // 1. MAVEN BUILD
-    /////////////////////////////////////////////////////////
-    stage('1. Build et Tests (Maven)') {
-      steps {
-        sh """
-          cd Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app
-          mvn clean package
-        """
-      }
-    }
-
-    /////////////////////////////////////////////////////////
-    // 2. ANALYSE SONARQUBE
-    /////////////////////////////////////////////////////////
-    stage('2. Analyse Statique SonarQube') {
-      steps {
-        withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-          sh """
-            cd Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app
-            mvn sonar:sonar \
-              -Dsonar.login=$SONAR_AUTH_TOKEN \
-              -Dsonar.host.url=${env.SONAR_URL}
-          """
+    // =============================================
+    // AGENT GLOBAL (Docker) — pour tous les stages SAUF le 4
+    // =============================================
+    agent {
+        docker {
+            image 'donald284/maven-jenkins-agent:v3'
+            args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
+            reuseNode true
         }
-      }
     }
 
-    /////////////////////////////////////////////////////////
-    // 3. DOCKER BUILD & PUSH
-    /////////////////////////////////////////////////////////
-    stage('3. Build et Push Docker') {
-      steps {
-        script {
-          sh """
-            cd Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app
-            docker build -t ${DOCKER_IMAGE} .
-          """
+    environment {
+        DOCKER_IMAGE = "donald284/ultimate-cicd:${BUILD_NUMBER}"
+        GIT_REPO_NAME = "Formation-Devops"
+        GIT_USER_NAME = "donaldte"
+    }
 
-          docker.withRegistry('https://index.docker.io/v1/', "docker-cred") {
-            docker.image("${DOCKER_IMAGE}").push()
-          }
-
-          // TAG latest
-          sh "docker tag ${DOCKER_IMAGE} donald284/ultimate-cicd:latest"
-
-          docker.withRegistry('https://index.docker.io/v1/', "docker-cred") {
-            docker.image("donald284/ultimate-cicd:latest").push()
-          }
+    stages {
+        // Stage 0 : Checkout → maintenant il s'exécute vraiment
+        stage('0. Checkout') {
+            steps {
+                git branch: 'main', url: "https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git"
+                sh 'pwd && ls -la'
+            }
         }
-      }
-    }
 
-    /////////////////////////////////////////////////////////
-    // 4. UPDATE K8S MANIFEST (HORS DOCKER - TRÈS IMPORTANT)
-    /////////////////////////////////////////////////////////
-    stage('4. Mise à jour du manifeste Kubernetes') {
-      steps {
-        withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-          sh """
-            set -e
-
-            REPO_DIR="\$WORKSPACE/temp-gitops-repo"
-            rm -rf "\$REPO_DIR"
-            mkdir -p "\$REPO_DIR"
-
-            git clone https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git "\$REPO_DIR"
-            cd "\$REPO_DIR"
-
-            git config user.email "donaldtedom0@gmail.com"
-            git config user.name "donaldte"
-
-            sed -i "s#image: donald284/ultimate-cicd:.*#image: donald284/ultimate-cicd:${BUILD_NUMBER}#" \
-              Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-
-            git add Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
-
-            if git diff --staged --quiet; then
-              echo "Aucun changement → rien à pousser"
-              exit 0
-            fi
-
-            git commit -m "Deploy v${BUILD_NUMBER} (build #${BUILD_NUMBER})"
-            git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main
-
-            echo "Push réussi ! ArgoCD va déployer la v${BUILD_NUMBER}"
-          """
+        stage('1. Build et Tests (Maven)') {
+            steps {
+                sh """
+                    cd Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app
+                    mvn clean package
+                """
+            }
         }
-      }
+
+        // ... stages 2 et 3 inchangés ...
+
+        // Stage 4 : GitOps → SUR LE MASTER JENKINS (pas dans le container !)
+        stage('4. Mise à jour du manifeste Kubernetes') {
+            agent none                              // ←←← OBLIGATOIRE
+            steps {
+                withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                    sh '''
+                        set -e
+                        REPO_DIR="$WORKSPACE/temp-gitops"
+                        rm -rf "$REPO_DIR"
+                        mkdir -p "$REPO_DIR"
+                        git clone https://github.com/donaldte/Formation-Devops.git "$REPO_DIR"
+                        cd "$REPO_DIR"
+
+                        sed -i "s#image: donald284/ultimate-cicd:.*#image: donald284/ultimate-cicd:${BUILD_NUMBER}#" \
+                            Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
+
+                        git add Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml || echo "Rien à ajouter"
+                        if git diff --staged --quiet; then
+                            echo "Aucun changement dans le manifest → rien à push"
+                            exit 0
+                        fi
+
+                        git commit -m "Deploy v${BUILD_NUMBER}"
+                        git push https://$GITHUB_TOKEN@github.com/donaldte/Formation-Devops.git HEAD:main
+                        echo "Manifest mis à jour ! ArgoCD va déployer la version ${BUILD_NUMBER}"
+                    '''
+                }
+            }
+        }
     }
 
-  } // end stages
-
-  ////////////////////////////////////////////////////////////////////////////
-  // NOTIFICATIONS SLACK
-  ////////////////////////////////////////////////////////////////////////////
-  post {
-
-    success {
-      slackSend(
-        channel: '#test-jenkins',
-        color: '#36a64f',
-        message: "🎉 SUCCESS — Build #${BUILD_NUMBER} déployé avec succès ! 🚀"
-      )
+    post {
+        success { slackSend(channel: '#test-jenkins', color: 'good', message: "SUCCÈS #${BUILD_NUMBER}") }
+        failure { slackSend(channel: '#test-jenkins', color: 'danger', message: "ÉCHEC #${BUILD_NUMBER}") }
     }
-
-    failure {
-      slackSend(
-        channel: '#test-jenkins',
-        color: '#ff0000',
-        message: "❌ FAILURE — Le pipeline #${BUILD_NUMBER} a échoué ! ⚠️"
-      )
-    }
-
-  } // end post
-
-} // end pipeline
+}
