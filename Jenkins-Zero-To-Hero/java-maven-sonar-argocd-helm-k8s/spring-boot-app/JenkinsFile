@@ -1,8 +1,4 @@
 pipeline {
-
-  ////////////////////////////////////////////////////////////////////////////
-  // AGENT DOCKER POUR LES BUILDS MAVEN, SONAR, DOCKER
-  ////////////////////////////////////////////////////////////////////////////
   agent {
     docker {
       image 'donald284/maven-jenkins-agent:v3'
@@ -10,24 +6,13 @@ pipeline {
     }
   }
 
-  ////////////////////////////////////////////////////////////////////////////
-  // VARIABLES D’ENVIRONNEMENT
-  ////////////////////////////////////////////////////////////////////////////
   environment {
-    DOCKER_IMAGE = "donald284/ultimate-cicd:${BUILD_NUMBER}"
-    GIT_REPO_NAME = "Formation-Devops"
-    GIT_USER_NAME = "donaldte"
-    // SONAR_URL vient de Jenkins (Manage Jenkins > Configure System > Global Env Vars)
+    DOCKER_IMAGE   = "donald284/ultimate-cicd:${BUILD_NUMBER}"
+    GIT_REPO_NAME  = "Formation-Devops"
+    GIT_USER_NAME  = "donaldte"
   }
 
-  ////////////////////////////////////////////////////////////////////////////
-  // STAGES
-  ////////////////////////////////////////////////////////////////////////////
   stages {
-
-    /////////////////////////////////////////////////////////
-    // 1. BUILD MAVEN
-    /////////////////////////////////////////////////////////
     stage('1. Build et Tests (Maven)') {
       steps {
         sh '''
@@ -37,119 +22,67 @@ pipeline {
       }
     }
 
-    /////////////////////////////////////////////////////////
-    // 2. ANALYSE SONARQUBE
-    /////////////////////////////////////////////////////////
     stage('2. Analyse Statique SonarQube') {
       steps {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
           sh """
             cd Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app
-            mvn sonar:sonar \
-              -Dsonar.login=$SONAR_AUTH_TOKEN \
-              -Dsonar.host.url=${env.SONAR_URL}
+            mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${env.SONAR_URL}
           """
         }
       }
     }
 
-    /////////////////////////////////////////////////////////
-    // 3. BUILD & PUSH DOCKER IMAGE
-    /////////////////////////////////////////////////////////
     stage('3. Build et Push de l’image Docker') {
       steps {
-        script {
-
-          // Build Docker
-          sh """
-            cd Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app
-            docker build -t ${DOCKER_IMAGE} .
-          """
-
-          // Push version tag
-          docker.withRegistry('https://index.docker.io/v1/', "docker-cred") {
-            docker.image("${DOCKER_IMAGE}").push()
-          }
-
-          // Tag latest
-          sh "docker tag ${DOCKER_IMAGE} donald284/ultimate-cicd:latest"
-
-          // Push latest
-          docker.withRegistry('https://index.docker.io/v1/', "docker-cred") {
-            docker.image("donald284/ultimate-cicd:latest").push()
-          }
+        sh "docker build -t ${DOCKER_IMAGE} Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app/."
+        docker.withRegistry('https://index.docker.io/v1/', 'docker-cred') {
+          docker.image("${DOCKER_IMAGE}").push()
+          docker.image("${DOCKER_IMAGE}").push('latest')
         }
       }
     }
 
-    /////////////////////////////////////////////////////////
-    // 4. MISE À JOUR DU MANIFESTE KUBERNETES (HORS DOCKER)
-    /////////////////////////////////////////////////////////
+    // STAGE 4 CORRIGÉ — SANS ACCOLADE EN TROP
     stage('4. Mise à jour du manifeste Kubernetes') {
-    agent none
-    steps {
-      withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-        sh '''
-          set -e
+      agent none
+      steps {
+        withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+          sh '''
+            set -e
+            REPO_DIR="$WORKSPACE/temp-gitops-repo"
+            rm -rf "$REPO_DIR"
+            mkdir -p "$REPO_DIR"
 
-          # On travaille dans un dossier temporaire pour éviter le lock de Jenkins
-          REPO_DIR="$WORKSPACE/temp-gitops-repo"
-          rm -rf "$REPO_DIR"
-          mkdir -p "$REPO_DIR"
+            git clone https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git "$REPO_DIR"
+            cd "$REPO_DIR"
 
-          echo "Clonage du dépôt dans un dossier temporaire..."
-          git clone https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git "$REPO_DIR"
-          cd "$REPO_DIR"
+            git config user.email "donaldtedom0@gmail.com"
+            git config user.name "donaldte"
 
-          git config user.email "donaldtedom0@gmail.com"
-          git config user.name "donaldte"
+            # CETTE LIGNE EST LA BONNE (elle marche quel que soit le tag actuel)
+            sed -i "/image:[[:space:]]*donald284\\/ultimate-cicd:/ s/:.*$/:${BUILD_NUMBER}/" \
+              Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
 
-          # Mise à jour du tag d'image
-          sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" \
-            Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
+            git add Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
 
-          git add Jenkins-Zero-To-Hero/java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
+            if git diff --staged --quiet; then
+              echo "Aucun changement → rien à pousser"
+              exit 0
+            fi
 
-          if git diff --staged --quiet; then
-            echo "Aucun changement détecté dans le manifeste → rien à pousser"
-            exit 0
-          fi
+            git commit -m "Deploy v${BUILD_NUMBER} (build #${BUILD_NUMBER})"
+            git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main
 
-          git commit -m "Deploy spring-boot-app v${BUILD_NUMBER} (Jenkins build #${BUILD_NUMBER})"
-
-          echo "Push vers GitHub en cours..."
-          git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main
-
-          echo "Mise à jour Git réussie ! ArgoCD va déployer la version ${BUILD_NUMBER} dans quelques secondes."
-        '''
+            echo "Push réussi ! ArgoCD va déployer la v${BUILD_NUMBER}"
+          '''
+        }
       }
     }
-}
-}
+  }
 
-  } // end stages
-
-  ////////////////////////////////////////////////////////////////////////////
-  // NOTIFICATIONS SLACK
-  ////////////////////////////////////////////////////////////////////////////
   post {
-
-    success {
-      slackSend(
-        channel: '#general',
-        color: '#36a64f',
-        message: "🎉 SUCCESS — Build *#${BUILD_NUMBER}* déployé avec succès ! 🚀"
-      )
-    }
-
-    failure {
-      slackSend(
-        channel: '#general',
-        color: '#ff0000',
-        message: "❌ FAILURE — Le pipeline a échoué au build *#${BUILD_NUMBER}*. ⚠️"
-      )
-    }
-
-  } // end post
-
-} // end pipeline
+    success { slackSend(channel: '#general', color: '#36a64f', message: "SUCCESS — Build #${BUILD_NUMBER} déployé !") }
+    failure { slackSend(channel: '#general', color: '#ff0000', message: "FAILURE — Build #${BUILD_NUMBER} échoué") }
+  }
+}
