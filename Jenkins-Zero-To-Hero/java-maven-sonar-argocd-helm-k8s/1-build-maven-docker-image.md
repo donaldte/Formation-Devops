@@ -134,6 +134,10 @@ args '--user root -v /var/run/docker.sock:/var/run/docker.sock'
 * `--user root` → donner les droits Docker au conteneur
 * `-v /var/run/docker.sock:/var/run/docker.sock` → utiliser **le Docker de la machine hôte** → indispensable pour build/push Docker
 
+# ajouter jenkins à docker
+sudo usermod -a -G docker jenkins
+
+
 ---
 
 # 🎉 **Ton pipeline est maintenant capable de :**
