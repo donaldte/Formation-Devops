@@ -91,7 +91,7 @@ pipeline {
     // 4. UPDATE K8S MANIFEST (HORS DOCKER - TRÈS IMPORTANT)
     /////////////////////////////////////////////////////////
     stage('4. Mise à jour du manifeste Kubernetes') {
-      agent none   // <-- indispensable
+      //agent none   // <-- indispensable
       steps {
         withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
           sh """
