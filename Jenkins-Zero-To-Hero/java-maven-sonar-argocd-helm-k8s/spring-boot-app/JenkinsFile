@@ -86,8 +86,6 @@ pipeline {
     // 4. MISE À JOUR DU MANIFESTE KUBERNETES (HORS DOCKER)
     /////////////////////////////////////////////////////////
     stage('4. Mise à jour du manifeste Kubernetes') {
-      agent any   // IMPORTANT : execute sur agent Jenkins → .git disponible
-
       steps {
         withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
           sh '''
