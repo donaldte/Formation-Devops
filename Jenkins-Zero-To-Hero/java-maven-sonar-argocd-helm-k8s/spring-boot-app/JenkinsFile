@@ -28,11 +28,11 @@ pipeline {
     /////////////////////////////////////////////////////////
     // 0. CHECKOUT GIT
     /////////////////////////////////////////////////////////
-    stage('0. Checkout') {
-      steps {
-        git branch: 'main', url: "https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git"
-      }
-    }
+    // stage('0. Checkout') {
+    //   steps {
+    //     git branch: 'main', url: "https://github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git"
+    //   }
+    // }
 
     /////////////////////////////////////////////////////////
     // 1. MAVEN BUILD
