@@ -77,19 +77,34 @@ docker run hello-world
 Installer pip :
 
 ```bash
-apt install -y python3-pip
+apt install -y python3-venv python3-pip
+```
+
+Créer un environnement virtuel :
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
 Installer LocalStack Community :
 
 ```bash
-pip install localstack
+python3 -m pip install --upgrade localstack
+```
+
+Installer LocalStack Pro :
+
+```bash
+python3 -m pip install "localstack[pro]"
 ```
 
 Installer AWS CLI :
 
 ```bash
-apt install -y awscli
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
 ```
 
 ---
