@@ -21,6 +21,13 @@ Ce projet d’application Spring Boot montre comment :
 
 # 🚀 **Comment exécuter le projet**
 
+## 1️⃣ **Prérequis**
+
+* **Java 11+**
+* **Maven 3+**
+* **LocalStack** (simulateur local des services AWS)
+* **awslocal** (wrapper AWS CLI pour LocalStack) 
+
 ## 1️⃣ **Construire l’application**
 
 Il s’agit d’une application Spring Boot classique, compilée avec :
@@ -40,7 +47,6 @@ src/main/resources/email-infra.yml
 ```
 
 ### ➤ Démarrer LocalStack + le serveur SMTP
-
 ```bash
 LOCALSTACK_AUTH_TOKEN=<your-api-key> docker-compose up -d
 ```
@@ -73,6 +79,11 @@ AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test mvn spring-boot:run
 
 ```bash
 awslocal ses verify-email-identity --email-address no-reply@localstack.cloud
+```
+
+### verify 
+```bash 
+awslocal ses list-identities
 ```
 
 ### ✔ Envoyer un message SNS
