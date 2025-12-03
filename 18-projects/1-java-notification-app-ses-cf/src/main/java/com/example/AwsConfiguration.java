@@ -15,6 +15,8 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 public class AwsConfiguration {
 
     private static final String ENDPOINT_URL = "http://localhost:4566";
+
+
     private static final Region DEFAULT_REGION = Region.US_EAST_1;
 
     @Bean
@@ -23,6 +25,7 @@ public class AwsConfiguration {
                 .region(DEFAULT_REGION)
                 .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
                 .applyMutation(builder -> {
+                    // TODO: conditional local-dev injection
                     builder.endpointOverride(URI.create(ENDPOINT_URL));
                 })
                 .build();
@@ -34,6 +37,7 @@ public class AwsConfiguration {
                 .region(DEFAULT_REGION)
                 .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
                 .applyMutation(builder -> {
+                    // TODO: conditional local-dev injection
                     builder.endpointOverride(URI.create(ENDPOINT_URL));
                 })
                 .build();
@@ -43,6 +47,7 @@ public class AwsConfiguration {
     @Autowired
     public String notificationQueueUrl(SqsClient sqsClient) {
         return sqsClient.getQueueUrl(builder -> {
+            // TODO: could get QueueUrl from stack output properties
             builder.queueName("email-notification-queue");
         }).queueUrl();
     }
