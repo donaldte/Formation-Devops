@@ -1,0 +1,11 @@
+spec:
+  containers:
+    - name: gateway
+      image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+      ports:
+        - containerPort: {{ .Values.containerPort }}
+      env:
+        - name: KAFKA_HOST
+          value: "kafka:9092"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://jaeger:4318"

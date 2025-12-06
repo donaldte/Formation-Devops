@@ -1,0 +1,103 @@
+services:
+  gateway-service:
+    build:
+      context: ./services/gateway
+    container_name: gateway-service
+    ports:
+      - "8080:8000"
+    depends_on:
+      - auth-service
+      - project-service
+      - billing-service
+      - notification-service
+      - analytics-service
+
+  auth-service:
+    build:
+      context: ./services/auth
+    container_name: auth-service
+    ports:
+      - "8000:8000"
+
+  project-service:
+    build:
+      context: ./services/project
+    container_name: project-service
+    ports:
+      - "8001:8000"
+
+  billing-service:
+    build:
+      context: ./services/billing
+    container_name: billing-service
+    ports:
+      - "8002:8000"
+
+  notification-service:
+    build:
+      context: ./services/notification
+    container_name: notification-service
+    ports:
+      - "8003:8000"
+
+  analytics-service:
+    build:
+      context: ./services/analytics
+    container_name: analytics-service
+    ports:
+      - "8004:8000"
+
+
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    container_name: zookeeper
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+    depends_on:
+      - zookeeper
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.50
+    container_name: jaeger
+    ports:
+      - "16686:16686"   # UI
+      - "6831:6831/udp" # Thrift over UDP
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - gateway-service
+      - auth-service
+      - project-service
+      - billing-service
+      - notification-service
+      - analytics-service
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus

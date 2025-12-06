@@ -1,0 +1,2 @@
+# Valeurs par défaut pour prometheus
+replicaCount: 1

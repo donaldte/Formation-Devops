@@ -1,0 +1,10 @@
+image:
+  repository: gateway-service
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+containerPort: 8000
