@@ -12,4 +12,5 @@ spec:
       protocol: TCP
       name: http
   selector:
+    app: auth
     {{- include "auth.selectorLabels" . | nindent 4 }}

@@ -1,0 +1,53 @@
+%% Architecture Microservices – CloudTaskHub
+%% Auteur : Donald Programmeur
+
+flowchart LR
+    subgraph Client
+        A[Browser / Mobile]
+    end
+
+    subgraph Traefik[Traefik Reverse Proxy]
+    end
+
+    A -->|HTTP Requests| Traefik
+
+    subgraph Services[Microservices (FastAPI)]
+        GW[Gateway Service]
+        AUTH[Auth Service]
+        PROJ[Project Service]
+        BILL[Billing Service]
+        NOTIF[Notification Service]
+        ANALYTICS[Analytics Service]
+    end
+
+    Traefik --> GW
+    Traefik --> AUTH
+    Traefik --> PROJ
+    Traefik --> BILL
+    Traefik --> NOTIF
+    Traefik --> ANALYTICS
+
+    GW --> AUTH
+    GW --> PROJ
+    GW --> BILL
+    GW --> NOTIF
+    GW --> ANALYTICS
+
+    BILL -->|Kafka Events| KAFKA[(Kafka Broker)]
+    NOTIF -->|Consume Events| KAFKA
+    ANALYTICS -->|Consume Events| KAFKA
+
+    subgraph Observability
+        JAEGER[Jaeger (Tracing)]
+        PROM[Prometheus (Metrics)]
+        GRAF[Grafana (Dashboards)]
+    end
+
+    Services -.->|Traces| JAEGER
+    Services -.->|Metrics| PROM
+    PROM --> GRAF
+
+    %% Signature
+    X{{Diagram created by <br/>**Donald Programmeur**}}:::signature
+
+    classDef signature fill=#222,color=#fff,border-radius:10px;

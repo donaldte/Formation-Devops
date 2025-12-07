@@ -12,4 +12,5 @@ spec:
       protocol: TCP
       name: http
   selector:
+    app: notification
     {{- include "notification.selectorLabels" . | nindent 4 }}

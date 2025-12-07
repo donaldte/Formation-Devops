@@ -12,4 +12,5 @@ spec:
       protocol: TCP
       name: http
   selector:
+    app: gateway
     {{- include "gateway.selectorLabels" . | nindent 4 }}

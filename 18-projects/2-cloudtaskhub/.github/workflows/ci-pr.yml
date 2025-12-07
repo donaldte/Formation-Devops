@@ -1,0 +1,62 @@
+name: CI - Pull Request Validation
+
+on:
+  pull_request:
+    branches: [ main ]
+
+env:
+  SERVICES: |
+    gateway
+    auth
+    project
+    billing
+    notification
+    analytics
+  DOCKERHUB_NAMESPACE: ${{ secrets.DOCKERHUB_USERNAME }}
+
+jobs:
+
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Run unit tests
+        run: pytest tests/unit
+
+      - name: Run integration tests
+        run: |
+          docker compose -f docker-compose.tests.yml up --build --abort-on-container-exit
+          docker compose -f docker-compose.tests.yml down
+
+      - name: Build docker images (LOCAL ONLY)
+        run: |
+          for SERVICE in $SERVICES; do
+            docker build -t ${SERVICE}-service:test ./services/${SERVICE}
+          done
+
+      - name: Slack notify (if failed)
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_TITLE: "❌ CI Failed for PR #${{ github.event.pull_request.number }}"
+          SLACK_COLOR: "#ff0000"
+          SLACK_MESSAGE: |
+            Pull Request failed tests or build.
+            Author: ${{ github.event.pull_request.user.login }}
+            Branch: ${{ github.head_ref }}
+            Commit: ${{ github.sha }}

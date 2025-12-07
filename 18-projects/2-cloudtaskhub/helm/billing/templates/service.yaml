@@ -12,4 +12,5 @@ spec:
       protocol: TCP
       name: http
   selector:
+    app: billing
     {{- include "billing.selectorLabels" . | nindent 4 }}

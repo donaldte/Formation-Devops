@@ -60,6 +60,11 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          env:
+            - name: KAFKA_HOST
+              value: "kafka:9092"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://jaeger:4318"
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}

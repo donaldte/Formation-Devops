@@ -12,4 +12,5 @@ spec:
       protocol: TCP
       name: http
   selector:
+    app: prometheus
     {{- include "prometheus.selectorLabels" . | nindent 4 }}

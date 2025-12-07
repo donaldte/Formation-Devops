@@ -1,0 +1,53 @@
+name: CD - Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        required: true
+        description: "Tag Docker à déployer (ex: a1b2c3d, latest)"
+
+env:
+  SERVICES: |
+    gateway
+    auth
+    project
+    billing
+    notification
+    analytics
+  DOCKERHUB_NAMESPACE: ${{ secrets.DOCKERHUB_USERNAME }}
+
+jobs:
+
+  rollback:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Rollback via SSH
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            TAG="${{ github.event.inputs.tag }}"
+            cd /opt/cloudtaskhub
+
+            echo "DOCKERHUB_USERNAME=${DOCKERHUB_NAMESPACE}" > .env
+            echo "IMAGE_TAG=${TAG}" >> .env
+
+            for SERVICE in $SERVICES; do
+              docker pull ${DOCKERHUB_NAMESPACE}/cloudtaskhub-${SERVICE}:${TAG}
+            done
+
+            docker stack deploy -c docker-compose.yml cloudtaskhub --with-registry-auth
+
+      - name: Slack notify rollback
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_COLOR: "#FFA500"
+          SLACK_TITLE: "🔄 ROLLBACK EXECUTED"
+          SLACK_MESSAGE: |
+            Rollback deployed with tag *${{ github.event.inputs.tag }}*
+            Initiated by: ${{ github.actor }}

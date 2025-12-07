@@ -12,4 +12,5 @@ spec:
       protocol: TCP
       name: http
   selector:
+    app: grafana
     {{- include "grafana.selectorLabels" . | nindent 4 }}

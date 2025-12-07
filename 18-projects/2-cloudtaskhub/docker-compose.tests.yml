@@ -1,0 +1,61 @@
+version: "3.9"
+
+services:
+
+  gateway-test:
+    build: ./services/gateway
+    environment:
+      - TEST_MODE=true
+    ports:
+      - "8080:8000"
+    depends_on:
+      - auth-test
+      - project-test
+      - billing-test
+      - notification-test
+      - analytics-test
+      - kafka-test
+
+  auth-test:
+    build: ./services/auth
+    ports:
+      - "8001:8000"
+
+  project-test:
+    build: ./services/project
+    ports:
+      - "8002:8000"
+
+  billing-test:
+    build: ./services/billing
+    ports:
+      - "8003:8000"
+    depends_on:
+      - kafka-test
+
+  notification-test:
+    build: ./services/notification
+    ports:
+      - "8004:8000"
+    depends_on:
+      - kafka-test
+
+  analytics-test:
+    build: ./services/analytics
+    ports:
+      - "8005:8000"
+    depends_on:
+      - kafka-test
+
+  kafka-test:
+    image: bitnami/kafka:latest
+    environment:
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka-test:9092
+    ports:
+      - "9094:9092"
+
+networks:
+  default:
+    driver: bridge
