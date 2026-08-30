@@ -191,8 +191,8 @@ spec:
     app: monapp
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 8080
+      port: 80  #Service port
+      targetPort: 8080  #container port
 ```
 
 > 🧠 Redirige les requêtes sur `mon-service:80` vers les Pods qui ont `app: monapp` sur le port 8080.
@@ -212,9 +212,9 @@ spec:
     app: monapp
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 8080
-      nodePort: 30036
+      port: 80   # Service port
+      targetPort: 8080  # container port
+      nodePort: 30036   # Port on nodes (30000-32767)
 ```
 
 > Permet d’accéder à l’app via `http://<NodeIP>:30036` depuis l’extérieur du cluster.
@@ -234,8 +234,8 @@ spec:
     app: monapp
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 8080
+      port: 80   # Service port
+      targetPort: 8080  # container port
 ```
 
 > Utilise le Load Balancer de ton cloud provider (ex : AWS ELB, GCP LB) pour exposer l’app sur Internet.
