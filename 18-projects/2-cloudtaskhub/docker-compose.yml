@@ -134,7 +134,7 @@ services:
   #   KAFKA (Bitnami)
   # ----------------------------------------
   zookeeper:
-    image: bitnami/zookeeper:latest
+    image: soldevelo/zookeeper:latest
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
     networks:
@@ -143,7 +143,7 @@ services:
       replicas: 1
 
   kafka:
-    image: bitnami/kafka:latest
+    image: soldevelo/kafka:latest
     environment:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
